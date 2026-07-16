@@ -35,8 +35,9 @@ manifests/
 
 ## Architecture
 
-Traffic enters through the Cloudflare Tunnel: `cloudflared` dials out and
-forwards each public hostname to Traefik, which routes by host. CI rewrites the
+Traffic enters through the Cloudflare Tunnel: `cloudflared` connects outbound
+to Cloudflare and forwards each public hostname to Traefik, which routes by
+host. CI rewrites the
 image tag in `manifests/app/kustomization.yaml`; Argo CD syncs the commit and
 rolls the Deployment. Alloy pushes metrics and pod logs to Grafana Cloud.
 
