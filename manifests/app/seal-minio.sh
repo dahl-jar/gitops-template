@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
-# //////////////////////////////////////////////////////////////////////////
-# SEAL MINIO
-# Mint MinIO root + scoped app keys and seal them for commit
-# //////////////////////////////////////////////////////////////////////////
-# Values exist only in this shell; only ciphertext is written.
+# Mint the MinIO root pair and scoped app keys, then seal them.
 set -euo pipefail
 set +x
 

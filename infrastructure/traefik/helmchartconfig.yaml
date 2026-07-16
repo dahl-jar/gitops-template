@@ -1,7 +1,5 @@
-# //////////////////////////////////////////////////////////////////////////
-# TRAEFIK
-# JSON access logs; drop auth and cookie headers
-# //////////////////////////////////////////////////////////////////////////
+# k3s installs Traefik through its packaged Helm chart; HelmChartConfig
+# overlays these values onto that install.
 apiVersion: helm.cattle.io/v1
 kind: HelmChartConfig
 metadata:

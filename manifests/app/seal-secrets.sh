@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
-# //////////////////////////////////////////////////////////////////////////
-# SEAL SECRETS
-# Encrypt the app, postgres, meilisearch, and backup secrets for commit
-# //////////////////////////////////////////////////////////////////////////
-# Reads each filled-in *.example.yaml; only ciphertext is written. Needs kubectl
-# and kubeseal pointed at the cluster running the SealedSecrets controller.
+# Turn the filled-in *.example.yaml files into committable SealedSecrets.
+# Needs kubectl and kubeseal pointed at the cluster running the
+# SealedSecrets controller.
 set -euo pipefail
 set +x
 

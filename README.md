@@ -22,7 +22,7 @@ infrastructure/             cluster-wide platform services
   traefik/                  ingress controller config
 manifests/
   app/                      the app namespace and its workloads
-    deployment.yaml         the app: Deployment, Service, Ingress, ConfigMap
+    deployment.yaml         the app; its Service, Ingress, ConfigMap sit next to it
     postgres/               StatefulSet, Service, exporter, backup CronJob
     redis/                  StatefulSet, Service
     meilisearch/            StatefulSet, Service
@@ -64,8 +64,6 @@ cd manifests/app
 ./seal-minio.sh          # mints and seals MinIO creds
 GH_USER=your-org GHCR_PAT=... ./seal-ghcr-pull.sh   # private image pull
 ```
-
-The scripts write only the encrypted output.
 
 ## Requirements
 

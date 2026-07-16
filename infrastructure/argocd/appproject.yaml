@@ -1,7 +1,5 @@
-# //////////////////////////////////////////////////////////////////////////
-# ARGO CD APPPROJECT
-# Pins source repo, destination namespace, allowed kinds
-# //////////////////////////////////////////////////////////////////////////
+# Scopes what the app may deploy: this repo only, the app namespace only,
+# and only the kinds listed below.
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
@@ -18,6 +16,8 @@ spec:
   destinations:
     - namespace: app
       server: https://kubernetes.default.svc
+    # cluster-scoped resources arrive with an empty namespace; without this
+    # entry Argo can't manage namespace.yaml
     - namespace: ""
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:

@@ -28,5 +28,5 @@ resources:
   - minio/sealedsecret.yaml
   - minio/statefulset.yaml
   - minio/service.yaml
-  - minio/minio-setup-job.yaml
+  - minio/setup-job.yaml
   - networkpolicy.yaml

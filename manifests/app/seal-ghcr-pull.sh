@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
-# //////////////////////////////////////////////////////////////////////////
-# SEAL GHCR PULL
-# Seal the image-pull secret for a private GHCR image
-# //////////////////////////////////////////////////////////////////////////
-# Pass the PAT (read:packages) via GHCR_PAT so it never hits argv or history:
+# Seal the image-pull secret for a private GHCR image. Pass the PAT
+# (read:packages) via GHCR_PAT so it never hits argv or shell history:
 #   read -rs GHCR_PAT && export GHCR_PAT
 #   GH_USER=your-org ./seal-ghcr-pull.sh
 #   unset GHCR_PAT

@@ -1,7 +1,6 @@
-# //////////////////////////////////////////////////////////////////////////
-# NETWORK POLICY
-# Default-deny, then explicit per-flow allows
-# //////////////////////////////////////////////////////////////////////////
+# Default-deny for the namespace, then one allow per flow. k3s enforces
+# NetworkPolicy via its embedded kube-router controller, so these rules
+# actually take effect.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -53,6 +52,8 @@ spec:
       ports:
         - { protocol: TCP, port: 8080 }
 ---
+# the two scraper policies assume a metrics collector in a "monitoring"
+# namespace; drop them if you don't run one
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
