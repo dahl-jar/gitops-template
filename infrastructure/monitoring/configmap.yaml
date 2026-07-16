@@ -1,0 +1,111 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alloy-config
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: platform
+data:
+  config.alloy: |
+    // Grafana Cloud endpoints. Push URLs come from your stack's Prometheus and
+    // Loki details pages; usernames and token from the grafana-cloud secret.
+    prometheus.remote_write "grafana_cloud" {
+      endpoint {
+        url = "REPLACE_WITH_PROMETHEUS_PUSH_URL"
+        basic_auth {
+          username = sys.env("PROM_USER")
+          password = sys.env("GRAFANA_TOKEN")
+        }
+      }
+    }
+
+    loki.write "grafana_cloud" {
+      endpoint {
+        url = "REPLACE_WITH_LOKI_PUSH_URL"
+        basic_auth {
+          username = sys.env("LOKI_USER")
+          password = sys.env("GRAFANA_TOKEN")
+        }
+      }
+    }
+
+    // scrape the app actuator on the internal management service
+    prometheus.scrape "app" {
+      targets = [{
+        __address__ = "app-mgmt.app.svc.cluster.local:8081",
+        job         = "app",
+      }]
+      metrics_path    = "/actuator/prometheus"
+      scrape_interval = "30s"
+      forward_to      = [prometheus.remote_write.grafana_cloud.receiver]
+    }
+
+    prometheus.scrape "postgres" {
+      targets = [{
+        __address__ = "postgres-exporter.app.svc.cluster.local:9187",
+        job         = "postgres",
+      }]
+      scrape_interval = "30s"
+      forward_to      = [prometheus.remote_write.grafana_cloud.receiver]
+    }
+
+    // Node metrics via the built-in unix exporter. rootfs_path points at the
+    // host root mounted read-only at /host/root, so node_filesystem_* reflects
+    // the real host disk instead of the container's view.
+    prometheus.exporter.unix "node" {
+      rootfs_path = "/host/root"
+      filesystem {
+        mount_points_exclude = "^/(dev|proc|sys|run|var/lib/docker/.+|var/lib/kubelet/.+)($|/)"
+        fs_types_exclude     = "^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs|tmpfs)$"
+      }
+    }
+
+    // Pin the node instance to a stable name. Without this the instance label
+    // is the alloy pod name, which changes on every restart and splits the
+    // series in host panels.
+    discovery.relabel "node" {
+      targets = prometheus.exporter.unix.node.targets
+      rule {
+        target_label = "instance"
+        replacement  = "server"
+      }
+    }
+
+    prometheus.scrape "node" {
+      targets         = discovery.relabel.node.output
+      scrape_interval = "30s"
+      forward_to      = [prometheus.remote_write.grafana_cloud.receiver]
+    }
+
+    // pod logs via kubernetes service discovery
+    discovery.kubernetes "pods" {
+      role = "pod"
+    }
+
+    discovery.relabel "pod_logs" {
+      targets = discovery.kubernetes.pods.targets
+      rule {
+        source_labels = ["__meta_kubernetes_namespace"]
+        target_label  = "namespace"
+      }
+      rule {
+        source_labels = ["__meta_kubernetes_pod_name"]
+        target_label  = "pod"
+      }
+      rule {
+        source_labels = ["__meta_kubernetes_pod_container_name"]
+        target_label  = "container"
+      }
+      // job label is <namespace>/<container> so log panels can query
+      // e.g. {job="app/app"}
+      rule {
+        source_labels = ["__meta_kubernetes_namespace", "__meta_kubernetes_pod_container_name"]
+        separator     = "/"
+        target_label  = "job"
+      }
+    }
+
+    loki.source.kubernetes "pods" {
+      targets    = discovery.relabel.pod_logs.output
+      forward_to = [loki.write.grafana_cloud.receiver]
+    }

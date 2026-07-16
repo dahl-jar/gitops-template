@@ -14,7 +14,7 @@ spec:
       port: 80
       targetPort: http
 ---
-# kept off the ingress; the actuator is only reachable in-cluster
+# actuator port for in-cluster scraping
 apiVersion: v1
 kind: Service
 metadata:

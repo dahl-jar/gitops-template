@@ -52,8 +52,8 @@ spec:
       ports:
         - { protocol: TCP, port: 8080 }
 ---
-# the two scraper policies assume a metrics collector in a "monitoring"
-# namespace; drop them if you don't run one
+# Alloy (infrastructure/monitoring) scrapes the app mgmt port and the
+# postgres exporter from the monitoring namespace
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

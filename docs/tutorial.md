@@ -1,8 +1,7 @@
 # Tutorial: from an empty machine to a running app
 
-Stands up the stack on a fresh single-node cluster: k3s, the SealedSecrets
-controller, Argo CD, then the app and its data services synced from your fork.
-Ends at a `200` from `/healthz`.
+k3s, the SealedSecrets controller, Argo CD, then the app and its data services
+synced from your fork. Ends at a `200` from `/healthz`.
 
 Needs an Ubuntu machine with `sudo`, a GitHub account, and `kubectl` on your
 workstation. Build the app image first: [how-to/build-and-push-image.md](how-to/build-and-push-image.md).
@@ -69,12 +68,9 @@ Log in at `https://localhost:8080` as `admin`. Leave the port-forward running.
 
 ## 5. Seal the secrets
 
-Set real values in each `secret.example.yaml`, then seal:
-
 ```sh
 cd manifests/app
-# edit secret.example.yaml, postgres/secret.example.yaml,
-# postgres/backup-secret.example.yaml, meilisearch/secret.example.yaml
+# fill every secret.example.yaml first
 ./seal-secrets.sh
 ./seal-minio.sh
 ```
@@ -122,7 +118,17 @@ curl -i http://localhost:8088/healthz     # 200
 ## Next steps
 
 - Hostname: set it in `manifests/app/ingress.yaml` and
-  `infrastructure/cloudflared/configmap.yaml`, create a Cloudflare Tunnel, seal
-  its credentials as in step 5.
+  `infrastructure/cloudflared/configmap.yaml`, create a Cloudflare Tunnel.
 - Backups: build an image with `pg_dump`, `gzip`, `gpg`, `rclone`, set it in
   `manifests/app/postgres/backup-cronjob.yaml`, seal the backup secret.
+- Monitoring: put your Grafana Cloud push URLs in
+  `infrastructure/monitoring/configmap.yaml`. Delete the directory if you
+  don't want it.
+- Seal the tunnel and Grafana Cloud secrets with kubeseal:
+
+```sh
+kubeseal --controller-name=sealed-secrets-controller \
+  --controller-namespace=kube-system --format=yaml \
+  < infrastructure/monitoring/secret.example.yaml \
+  > infrastructure/monitoring/sealedsecret.yaml
+```

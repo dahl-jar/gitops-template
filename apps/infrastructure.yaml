@@ -13,6 +13,8 @@ spec:
     path: infrastructure
     directory:
       recurse: true
+      # example secrets are kubeseal input; never apply their CHANGE_ME values
+      exclude: "**/secret.example.yaml"
   destination:
     server: https://kubernetes.default.svc
   syncPolicy:

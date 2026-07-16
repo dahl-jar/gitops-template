@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Mint the MinIO root pair and scoped app keys, then seal them.
+# Generate the MinIO root pair and scoped app keys, then seal them.
 set -euo pipefail
 set +x
 

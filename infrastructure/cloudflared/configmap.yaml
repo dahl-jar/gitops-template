@@ -12,8 +12,7 @@ data:
     metrics: 0.0.0.0:2000
     no-autoupdate: true
     ingress:
-      # public hostnames land here and get handed to in-cluster Traefik,
-      # which routes by host
+      # each public hostname forwards to in-cluster Traefik, which routes by host
       - hostname: api.example.com
         service: http://traefik.kube-system.svc.cluster.local:80
       - service: http_status:404

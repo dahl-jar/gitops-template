@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Turn the filled-in *.example.yaml files into committable SealedSecrets.
+# Encrypt the filled-in *.example.yaml files into committable SealedSecrets.
 # Needs kubectl and kubeseal pointed at the cluster running the
 # SealedSecrets controller.
 set -euo pipefail

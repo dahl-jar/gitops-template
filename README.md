@@ -19,21 +19,19 @@ apps/                       Argo CD Application definitions
 infrastructure/             cluster-wide platform services
   argocd/                   AppProject scoping what the app may deploy
   cloudflared/              tunnel connector and config
+  monitoring/               Grafana Alloy pushing metrics and logs to Grafana Cloud
   traefik/                  ingress controller config
 manifests/
   app/                      the app namespace and its workloads
-    deployment.yaml         the app; its Service, Ingress, ConfigMap sit next to it
+    deployment.yaml         the app Deployment
     postgres/               StatefulSet, Service, exporter, backup CronJob
     redis/                  StatefulSet, Service
     meilisearch/            StatefulSet, Service
     minio/                  StatefulSet, Service, bucket-and-user setup Job
     networkpolicy.yaml      default-deny plus per-flow allows
-    kustomization.yaml      ties it together; CI pins the image tag here
-    seal-*.sh               turn example secrets into committable SealedSecrets
+    kustomization.yaml      lists every resource; CI pins the image tag here
+    seal-*.sh               encrypt example secrets into committable SealedSecrets
 ```
-
-Argo CD reads `apps/`: the two Application objects point it at `infrastructure/`
-and `manifests/app`, and it reconciles each.
 
 ## Architecture
 
@@ -45,6 +43,9 @@ CI builds the image, pushes it, and rewrites the tag in
 `manifests/app/kustomization.yaml`. Argo CD reconciles the commit and rolls the
 Deployment.
 
+Alloy scrapes the app's actuator, the postgres exporter, and node metrics,
+tails pod logs, and pushes to Grafana Cloud.
+
 Pods run non-root with a read-only root filesystem and no Linux capabilities.
 The namespace denies all traffic by default; each flow is allowed by name. The
 app's egress allows HTTPS but excludes the pod and service CIDRs, so a
@@ -52,16 +53,16 @@ compromised app pod cannot reach other namespaces.
 
 ## Secrets
 
-Secrets use [Bitnami SealedSecrets](https://github.com/bitnami-labs/sealed-secrets).
-The controller holds the private key; the encrypted `sealedsecret.yaml` files are
-safe to commit and only this cluster can decrypt them.
+Secrets use [Bitnami SealedSecrets](https://github.com/bitnami-labs/sealed-secrets):
+the controller holds the private key, so only this cluster can decrypt the
+committed `sealedsecret.yaml` files.
 
 Set values in each `secret.example.yaml`, then seal:
 
 ```sh
 cd manifests/app
 ./seal-secrets.sh        # app, postgres, meilisearch, backup
-./seal-minio.sh          # mints and seals MinIO creds
+./seal-minio.sh          # generates and seals MinIO creds
 GH_USER=your-org GHCR_PAT=... ./seal-ghcr-pull.sh   # private image pull
 ```
 
@@ -70,7 +71,8 @@ GH_USER=your-org GHCR_PAT=... ./seal-ghcr-pull.sh   # private image pull
 - A cluster (k3s or otherwise) with Traefik and the SealedSecrets controller
 - Argo CD pointed at your fork
 - A Cloudflare Tunnel, and an S3-compatible bucket if you want the backups
-- `kubectl`, `kubeseal`, and `kustomize` for a local `kustomize build manifests/app`
+- A Grafana Cloud stack if you keep the monitoring
+- `kubectl` and `kubeseal` on the workstation
 
 ## Adapting
 
