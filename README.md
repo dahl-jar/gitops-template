@@ -29,35 +29,22 @@ manifests/
     meilisearch/            StatefulSet, Service
     minio/                  StatefulSet, Service, bucket-and-user setup Job
     networkpolicy.yaml      default-deny plus per-flow allows
-    kustomization.yaml      lists every resource; CI pins the image tag here
+    kustomization.yaml      lists every resource; CI pins the image tag
     seal-*.sh               encrypt example secrets into committable SealedSecrets
 ```
 
 ## Architecture
 
-The cluster opens no inbound ports. `cloudflared` dials out to Cloudflare's edge
-and maps a public hostname to the in-cluster Traefik ingress, which routes to the
-app by host.
-
-CI builds the image, pushes it, and rewrites the tag in
-`manifests/app/kustomization.yaml`. Argo CD reconciles the commit and rolls the
-Deployment.
-
-Alloy scrapes the app's actuator, the postgres exporter, and node metrics,
-tails pod logs, and pushes to Grafana Cloud.
-
-Pods run non-root with a read-only root filesystem and no Linux capabilities.
-The namespace denies all traffic by default; each flow is allowed by name. The
-app's egress allows HTTPS but excludes the pod and service CIDRs, so a
-compromised app pod cannot reach other namespaces.
+Traffic enters through the Cloudflare Tunnel: `cloudflared` dials out and
+forwards each public hostname to Traefik, which routes by host. CI rewrites the
+image tag in `manifests/app/kustomization.yaml`; Argo CD syncs the commit and
+rolls the Deployment. Alloy pushes metrics and pod logs to Grafana Cloud.
 
 ## Secrets
 
-Secrets use [Bitnami SealedSecrets](https://github.com/bitnami-labs/sealed-secrets):
-the controller holds the private key, so only this cluster can decrypt the
-committed `sealedsecret.yaml` files.
-
-Set values in each `secret.example.yaml`, then seal:
+[Bitnami SealedSecrets](https://github.com/bitnami-labs/sealed-secrets): only
+the cluster's controller can decrypt the committed `sealedsecret.yaml` files.
+Fill each `secret.example.yaml`, then:
 
 ```sh
 cd manifests/app

@@ -75,7 +75,7 @@ cd manifests/app
 ./seal-minio.sh
 ```
 
-Each script writes an encrypted `sealedsecret.yaml`. Commit them:
+Commit the sealed output:
 
 ```sh
 cd ../..
