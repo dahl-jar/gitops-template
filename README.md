@@ -1,39 +1,32 @@
-# gitops-template
+<h1 align="center">gitops-template</h1>
 
-Manifests for a single-node k3s cluster. Argo CD deploys everything from this
-repo, traffic comes in through a Cloudflare Tunnel, and CI decides which image
-version runs.
+<p align="center">
+  Kubernetes manifests for a single-node k3s cluster, deployed by Argo CD from this repo.
+</p>
 
-The example service is `app`: a JVM app with Postgres, Redis, Meilisearch and
-MinIO, and a nightly encrypted Postgres backup. Names are placeholders (`app`,
-`your-org`, `example.com`).
+## Stack
 
-## How it fits together
+k3s · Argo CD · Kustomize · Sealed Secrets · Cloudflare Tunnel · Traefik · Grafana Alloy · GitHub Actions
 
-Each service has three folders. `modules/app` holds the manifests. `deploy/app`
-is what Argo CD points at; it pulls in the module, the version and
-`variables.env`. `versions/app` holds the image tag and digest, and only CI
-writes it.
+## Service
 
-When the service repo builds an image, it runs the job in
-`.github/workflows/pin-image.example.yml`. That job writes the new tag and
-digest into `versions/app` and pushes. The `verify` workflow renders and
-validates every manifest, and Argo CD rolls out the commit.
+The example service is `app`, a JVM app with Postgres, Redis, Meilisearch and MinIO, and a nightly encrypted Postgres backup. The names are placeholders (`app`, `your-org`, `example.com`).
 
-`platform/` holds the cluster-wide pieces: the Argo CD project, the tunnel,
-monitoring, Traefik and a storage class with `Retain`, so deleting a claim or an
-Application keeps the data on disk.
+### Layout
 
-## Getting started
+Each service has three folders. `modules/app` has the manifests, `deploy/app` is what Argo CD points at, and `versions/app` has the image tag and digest. Only CI writes the version, so nobody has to edit it by hand.
 
-- [Tutorial](docs/tutorial.md), from an empty machine to a running app
-- [Build and push the image](docs/how-to/build-and-push-image.md)
-- [Add a service](docs/how-to/add-a-service.md)
+### Deploy
+
+When the service repo builds an image, it runs the job in `.github/workflows/pin-image.example.yml`. The job writes the new tag and digest into `versions/app` and pushes. The `verify` workflow renders and checks every manifest, and Argo CD rolls out the commit.
+
+## Platform
+
+`platform/` has the Argo CD project, the tunnel, monitoring, Traefik and a storage class with `Retain`. Deleting a claim or an Application keeps the data on disk.
 
 ## Secrets
 
-Fill each `secret.example.yaml`, then seal it. Only the cluster can decrypt the
-committed `sealedsecret.yaml` files.
+Fill each `secret.example.yaml` and seal it. Only the cluster can decrypt the committed `sealedsecret.yaml` files.
 
 ```sh
 cd modules/app/base
@@ -41,6 +34,10 @@ cd modules/app/base
 ./seal-minio.sh          # generates and seals MinIO creds
 GH_USER=your-org GHCR_PAT=... ./seal-ghcr-pull.sh   # private image pull
 ```
+
+## Docs
+
+[Set up a cluster and run the app](docs/tutorial.md). [Build and push the image](docs/how-to/build-and-push-image.md). [Add a service](docs/how-to/add-a-service.md).
 
 ## License
 
