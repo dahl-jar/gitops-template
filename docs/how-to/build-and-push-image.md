@@ -21,21 +21,28 @@ ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 
 ```sh
 echo "$GHCR_PAT" | docker login ghcr.io -u your-org --password-stdin   # PAT: write:packages
-TAG=sha-$(git rev-parse --short HEAD)
+TAG=sha-$(git rev-parse HEAD)
 docker build -t ghcr.io/your-org/app:$TAG .
 docker push ghcr.io/your-org/app:$TAG
+docker buildx imagetools inspect ghcr.io/your-org/app:$TAG --format '{{json .Manifest.Digest}}'
 ```
 
-## 3. Set the tag
+## 3. Pin the version
+
+In CI, call `.github/workflows/pin-image.example.yml` from the service repo
+after the push, with the image name and the digest from step 2. It writes
+`versions/app/kustomization.yaml` and pushes; Argo CD rolls the Deployment.
+
+By hand, the same thing is:
 
 ```sh
-cd manifests/app
-kustomize edit set image ghcr.io/your-org/app=ghcr.io/your-org/app:$TAG
-git commit -am "Deploy $TAG" && git push
+cd versions/app
+kustomize edit set image ghcr.io/your-org/app=ghcr.io/your-org/app:$TAG@$DIGEST
+git commit -am "Deploy app $TAG" && git push
 ```
 
-Argo CD rolls the Deployment. For a private package, seal a pull secret once:
+For a private package, seal a pull secret once:
 
 ```sh
-GH_USER=your-org GHCR_PAT=... ./seal-ghcr-pull.sh   # in manifests/app
+GH_USER=your-org GHCR_PAT=... ./seal-ghcr-pull.sh   # in modules/app/base
 ```

@@ -69,17 +69,17 @@ Log in at `https://localhost:8080` as `admin`. Leave the port-forward running.
 ## 5. Seal the secrets
 
 ```sh
-cd manifests/app
+cd modules/app/base
 # fill every secret.example.yaml first
 ./seal-secrets.sh
 ./seal-minio.sh
 ```
 
-Commit the sealed output:
+The scripts overwrite the placeholder `sealedsecret.yaml` files. Commit them:
 
 ```sh
-cd ../..
-git add manifests/app/**/sealedsecret.yaml manifests/app/sealedsecret.yaml
+cd ../../..
+git add modules/app/base
 git commit -m "Add sealed secrets"
 git push
 ```
@@ -90,8 +90,16 @@ Replace `https://github.com/your-org/your-repo.git` in:
 
 ```text
 apps/app.yaml
-apps/infrastructure.yaml
-infrastructure/argocd/appproject.yaml
+apps/platform.yaml
+platform/argocd/appproject.yaml
+```
+
+Set the node name in `modules/app/base/postgres/backup-pv.yaml` and create the
+directory it points at on the machine:
+
+```sh
+kubectl get nodes -o name
+sudo mkdir -p /var/lib/app-backups && sudo chown 10001:10001 /var/lib/app-backups
 ```
 
 ```sh
@@ -102,10 +110,14 @@ git push
 ## 7. Apply the Applications
 
 ```sh
-kubectl apply -f infrastructure/argocd/appproject.yaml
+kubectl apply -f platform/argocd/appproject.yaml
 kubectl apply -f apps/
-kubectl get applications -n argocd        # app, infrastructure -> Synced/Healthy
+kubectl get applications -n argocd        # app, platform -> Synced/Healthy
 ```
+
+The app pod stays pending until CI has pinned a real image. Run the service
+repo's build once, or pin by hand as in
+[how-to/build-and-push-image.md](how-to/build-and-push-image.md).
 
 ## 8. Verify
 
@@ -117,18 +129,20 @@ curl -i http://localhost:8088/healthz     # 200
 
 ## Next steps
 
-- Hostname: set it in `manifests/app/ingress.yaml` and
-  `infrastructure/cloudflared/configmap.yaml`, create a Cloudflare Tunnel.
-- Backups: build an image with `pg_dump`, `gzip`, `gpg`, `rclone`, set it in
-  `manifests/app/postgres/backup-cronjob.yaml`, seal the backup secret.
+- Hostname: set it in `modules/app/base/ingress.yaml` and
+  `platform/cloudflared/configmap.yaml`, create a Cloudflare Tunnel.
+- Backups: build an image with `bash`, `pg_dump`, `gzip` and `gpg`, set it in
+  `modules/app/base/postgres/backup-cronjob.yaml`, seal the backup secret.
 - Monitoring: put your Grafana Cloud push URLs in
-  `infrastructure/monitoring/configmap.yaml`. Delete the directory if you
-  don't want it.
+  `platform/monitoring/configmap.yaml`. Delete the directory if you don't
+  want it.
+- CI: the `verify` workflow runs on every push. Add a `GHCR_READ_TOKEN` secret
+  (read:packages) if the images are private.
 - Seal the tunnel and Grafana Cloud secrets with kubeseal:
 
 ```sh
 kubeseal --controller-name=sealed-secrets-controller \
   --controller-namespace=kube-system --format=yaml \
-  < infrastructure/monitoring/secret.example.yaml \
-  > infrastructure/monitoring/sealedsecret.yaml
+  < platform/monitoring/secret.example.yaml \
+  > platform/monitoring/sealedsecret.yaml
 ```

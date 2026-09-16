@@ -1,0 +1,67 @@
+# Copy this job into the service repo's build workflow. It runs there after the
+# image is pushed and writes the new tag and digest into versions/<service>.
+#
+# Secrets in the service repo:
+#   MANIFESTS_REPO        owner/name of this repo
+#   MANIFESTS_DEPLOY_KEY  private half of a deploy key with write access here
+name: pin-image
+
+on:
+  workflow_call:
+    inputs:
+      service:
+        required: true
+        type: string
+      image:
+        required: true
+        type: string
+      digest:
+        required: true
+        type: string
+    secrets:
+      MANIFESTS_REPO:
+        required: true
+      MANIFESTS_DEPLOY_KEY:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  pin:
+    name: Pin image in manifests
+    runs-on: ubuntu-latest
+    env:
+      SERVICE: ${{ inputs.service }}
+      IMAGE: ${{ inputs.image }}
+      DIGEST: ${{ inputs.digest }}
+    steps:
+      - name: Checkout manifests repo
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+        with:
+          repository: ${{ secrets.MANIFESTS_REPO }}
+          ssh-key: ${{ secrets.MANIFESTS_DEPLOY_KEY }}
+          path: manifests
+
+      - name: Pin image to this commit and digest
+        working-directory: manifests
+        run: |
+          set -euo pipefail
+          test -n "${DIGEST}"
+          cd "versions/${SERVICE}"
+          kustomize edit set image "${IMAGE}=${IMAGE}:sha-${GITHUB_SHA}@${DIGEST}"
+
+      - name: Commit and push if changed
+        working-directory: manifests
+        run: |
+          set -euo pipefail
+          file="versions/${SERVICE}/kustomization.yaml"
+          if git diff --quiet -- "$file"; then
+            echo "already pinned to sha-${GITHUB_SHA}"
+            exit 0
+          fi
+          git config user.name "${SERVICE}-ci"
+          git config user.email "ci@users.noreply.github.com"
+          git add "$file"
+          git commit -m "Deploy ${SERVICE} sha-${GITHUB_SHA}" -- "$file"
+          git push

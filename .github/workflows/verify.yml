@@ -1,0 +1,91 @@
+name: verify
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  KUBECONFORM_VERSION: v0.8.0
+
+jobs:
+  render-and-validate:
+    name: Render and validate manifests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - uses: astral-sh/setup-uv@e92bafb6253dcd438e0484186d7669ea7a8ca1cc  # v6
+
+      - name: Install kubeconform
+        run: |
+          set -euo pipefail
+          curl -sSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
+            | tar -xz -C /usr/local/bin kubeconform
+          kubeconform -v
+
+      - name: Render every kustomization
+        run: scripts/render-all.sh
+
+      - name: Claims use a Retain storage class
+        run: uv run --with pyyaml python3 scripts/check-storage-classes.py out/*.yaml
+
+      - name: Validate rendered manifests
+        run: |
+          set -euo pipefail
+          kubeconform -strict -summary \
+            -ignore-missing-schemas \
+            -schema-location default \
+            -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            out/*.yaml
+
+  application-paths:
+    name: Applications point at existing paths
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Check every Application source path
+        run: |
+          set -euo pipefail
+          failed=0
+          while IFS= read -r file; do
+            if ! grep -q '^kind: Application$' "$file"; then
+              continue
+            fi
+            path="$(sed -n 's/^ *path: *//p' "$file" | head -1)"
+            name="$(sed -n 's/^  name: *//p' "$file" | head -1)"
+            if [ -z "$path" ] || [ ! -d "$path" ]; then
+              echo "FAILED  $name ($file) points at missing directory '$path'" >&2
+              failed=1
+            else
+              echo "ok      $name -> $path"
+            fi
+          done < <(find apps -name '*.yaml' | sort)
+          exit "$failed"
+
+  image-digests:
+    name: Pinned images exist in their registries
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Render every kustomization
+        run: scripts/render-all.sh
+
+      - name: Log in to GHCR for private images
+        env:
+          GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GHCR_READ_TOKEN}" ]; then
+            echo "GHCR_READ_TOKEN not set; private images will show as missing"
+            exit 0
+          fi
+          printf '%s' "${GHCR_READ_TOKEN}" | docker login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
+
+      - name: Check image digests
+        run: scripts/check-image-digests.sh out/*.yaml

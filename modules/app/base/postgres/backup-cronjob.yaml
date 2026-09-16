@@ -1,0 +1,109 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: app
+  labels:
+    app.kubernetes.io/name: postgres-backup
+    app.kubernetes.io/part-of: app
+spec:
+  schedule: "0 3 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      ttlSecondsAfterFinished: 86400
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: postgres-backup
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            fsGroup: 10001
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: backup
+              image: ghcr.io/your-org/postgres-backup:latest
+              imagePullPolicy: IfNotPresent
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              volumeMounts:
+                - { name: tmp, mountPath: /tmp }
+                - { name: gnupg, mountPath: /home/pgbackup/.gnupg }
+                - { name: backups, mountPath: /backups }
+              env:
+                - name: GNUPGHOME
+                  value: /home/pgbackup/.gnupg
+                - name: DB_HOST
+                  value: postgres.app.svc.cluster.local
+                - name: DB_NAME
+                  value: app
+                - name: DB_USERNAME
+                  value: app
+                - name: BACKUP_DIR
+                  value: /backups
+                - name: KEEP_DAILY_DAYS
+                  value: "14"
+                - name: KEEP_WEEKLY_DAYS
+                  value: "56"
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: app-secrets
+                      key: DB_PASSWORD
+                - name: BACKUP_GPG_PASSPHRASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: app-backup
+                      key: gpg_passphrase
+              args:
+                - |
+                  set -euo pipefail
+                  log() { echo "[$(date -u +%H:%M:%S)] $*"; }
+                  for i in $(seq 1 30); do
+                    if pg_isready -h "$DB_HOST" -U "$DB_USERNAME" -d "$DB_NAME" -t 3 >/dev/null 2>&1; then
+                      break
+                    fi
+                    sleep 5
+                    if [ "$i" = "30" ]; then log "pg_isready failed after 30 attempts"; exit 71; fi
+                  done
+                  day=$(date -u +%Y-%m-%d)
+                  week=$(date -u +%G-W%V)
+                  daily_dir="${BACKUP_DIR}/daily"
+                  weekly_dir="${BACKUP_DIR}/weekly"
+                  mkdir -p "$daily_dir" "$weekly_dir"
+                  daily_file="${daily_dir}/pg-${DB_NAME}-${day}.sql.gz.gpg"
+                  tmp_file="${daily_file}.tmp"
+                  trap 'rm -f "$tmp_file"' EXIT
+                  pg_dump -h "$DB_HOST" -U "$DB_USERNAME" --no-owner --no-privileges "$DB_NAME" \
+                    | gzip -9 \
+                    | gpg --batch --yes --quiet --symmetric --cipher-algo AES256 \
+                          --passphrase-fd 3 3<<<"$BACKUP_GPG_PASSPHRASE" \
+                    > "$tmp_file"
+                  size=$(stat -c %s "$tmp_file")
+                  if [ "$size" -lt 1024 ]; then log "backup.fail target=$daily_file size=$size"; exit 65; fi
+                  mv "$tmp_file" "$daily_file"
+                  log "backup.ok target=$daily_file size=$size"
+                  if [ "$(date -u +%u)" = "7" ]; then
+                    cp "$daily_file" "${weekly_dir}/pg-${DB_NAME}-${week}.sql.gz.gpg"
+                  fi
+                  find "$daily_dir" -name 'pg-*.sql.gz.gpg' -mtime "+$((KEEP_DAILY_DAYS - 1))" -delete
+                  find "$weekly_dir" -name 'pg-*.sql.gz.gpg' -mtime "+$((KEEP_WEEKLY_DAYS - 1))" -delete
+                  log "backup.done date=$day kept_daily=$(find "$daily_dir" -type f | wc -l) kept_weekly=$(find "$weekly_dir" -type f | wc -l)"
+          volumes:
+            - { name: tmp, emptyDir: {} }
+            - { name: gnupg, emptyDir: {} }
+            - name: backups
+              persistentVolumeClaim:
+                claimName: app-backups

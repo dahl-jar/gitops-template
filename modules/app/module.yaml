@@ -1,0 +1,6 @@
+name: app
+source: github.com/your-org/app
+image: ghcr.io/your-org/app
+pinnedBy: <service repo>/.github/workflows/<workflow>.yml (writes versions/app)
+components: app, postgres, redis, meilisearch, minio
+secrets: seal-secrets.sh, seal-minio.sh, seal-ghcr-pull.sh in base/

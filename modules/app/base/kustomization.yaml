@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - sealedsecret.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+  - postgres/sealedsecret.yaml
+  - postgres/statefulset.yaml
+  - postgres/service.yaml
+  - postgres/exporter.yaml
+  - postgres/backup-sealedsecret.yaml
+  - postgres/backup-pv.yaml
+  - postgres/backup-pvc.yaml
+  - postgres/backup-cronjob.yaml
+  - redis/statefulset.yaml
+  - redis/service.yaml
+  - meilisearch/sealedsecret.yaml
+  - meilisearch/statefulset.yaml
+  - meilisearch/service.yaml
+  - minio/sealedsecret.yaml
+  - minio/statefulset.yaml
+  - minio/service.yaml
+  - minio/setup-job.yaml
+  - networkpolicy.yaml
