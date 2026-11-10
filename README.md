@@ -34,7 +34,7 @@ To release to production, edit the version file of the app on `prod`, for exampl
 
 A separate terminal client lists the approval requests and records the decisions:
 
-![Terminal client with a release that waits for approval](.github/approval.png)
+![Terminal client with a Terraform apply that waits for approval](.github/approval.png)
 
 ## Pipeline library
 
