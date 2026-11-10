@@ -19,13 +19,9 @@ Each app has one file in `environments/`, which defines the Jenkins jobs, image 
 Argo CD deploys branch `dev` to the dev environment and branch `prod` to production. A push to an app repo starts this flow:
 
 ```mermaid
+%%{init: {'theme': 'neutral'}}%%
 flowchart LR
-  App[App repo] -->|request| Queue[SQS queue]
-  Queue --> Listener[Hook listener]
-  Listener --> Jenkins
-  Jenkins -->|image| ECR
-  Jenkins -->|tag and digest| Versions[versions/]
-  Versions --> Argo[Argo CD]
+  App[App repo] --> Queue --> Jenkins --> Repo[This repo] --> Argo[Argo CD] --> Cluster
 ```
 
 A workflow in the app repo sends the queue a request with the repo, ref and commit, using the role from the Terraform output `deploy_hook_app_role_arn`. The hook listener in the cluster reads the request and starts the Jenkins job of the app. The job pushes the image to ECR and commits its tag and digest to `versions/`, and Argo CD deploys that commit.
@@ -33,6 +29,8 @@ A workflow in the app repo sends the queue a request with the repo, ref and comm
 To release to production, edit the version file of the app on `prod`, for example `versions/example-api/version.yaml`. The release then waits for an approval. The `deploy-hook` stack has a DynamoDB table for approval requests and a table for decisions, and a Lambda function sends each approved request to the queue.
 
 A separate terminal client lists the approval requests and records the decisions:
+
+![Terminal client with the list of approval requests](.github/requests.png)
 
 ![Terminal client with a Terraform apply that waits for approval](.github/approval.png)
 
