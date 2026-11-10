@@ -3,7 +3,7 @@ kind: StorageClass
 metadata:
   name: local-path-retain
   labels:
-    app.kubernetes.io/part-of: platform
+    app.kubernetes.io/part-of: gitops
 provisioner: rancher.io/local-path
 reclaimPolicy: Retain
 volumeBindingMode: WaitForFirstConsumer

@@ -1,0 +1,62 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: ci-builds-guard
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+  labels:
+    app.kubernetes.io/name: ci-builds-guard
+    app.kubernetes.io/component: agents
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods", "pods/ephemeralcontainers"]
+  variables:
+    - name: containers
+      expression: "object.spec.containers + object.spec.?initContainers.orValue([]) + object.spec.?ephemeralContainers.orValue([])"
+    - name: build
+      expression: "object.metadata.?labels[?'app.kubernetes.io/component'].orValue('') == 'build'"
+  validations:
+    - expression: "!object.spec.?hostNetwork.orValue(false) && !object.spec.?hostPID.orValue(false) && !object.spec.?hostIPC.orValue(false)"
+      message: "pods in ci-build must not share a host namespace"
+    - expression: "object.spec.?volumes.orValue([]).all(v, has(v.emptyDir) || has(v.persistentVolumeClaim) || has(v.configMap) || has(v.secret) || has(v.projected) || has(v.downwardAPI))"
+      message: "pods in ci-build may mount only emptyDir, persistentVolumeClaim, configMap, secret, projected and downwardAPI volumes"
+    - expression: "variables.containers.all(c, !c.?securityContext.?privileged.orValue(false) && c.?securityContext.?capabilities.?add.orValue([]).size() == 0)"
+      message: "containers in ci-build must not be privileged or add capabilities"
+    - expression: "variables.containers.all(c, c.?ports.orValue([]).all(p, p.?hostPort.orValue(0) == 0))"
+      message: "containers in ci-build must not use a host port"
+    - expression: "variables.containers.all(c, c.?securityContext.?procMount.orValue('Default') == 'Default')"
+      message: "containers in ci-build must use the Default proc mount"
+    - expression: "object.spec.?securityContext.?sysctls.orValue([]).size() == 0"
+      message: "pods in ci-build must not set sysctls"
+    - expression: "object.spec.?securityContext.?runAsNonRoot.orValue(false) && object.spec.?securityContext.?runAsUser.orValue(0) == 1000 && variables.containers.all(c, c.?securityContext.?runAsUser.orValue(1000) == 1000)"
+      message: "pods in ci-build must run as user 1000"
+    - expression: "object.spec.?securityContext.?seccompProfile.?type.orValue('') == 'RuntimeDefault' && object.spec.?securityContext.?appArmorProfile.?type.orValue('RuntimeDefault') != 'Unconfined'"
+      message: "pods in ci-build must set seccomp RuntimeDefault and no Unconfined AppArmor at pod level"
+    - expression: "variables.containers.all(c, (variables.build && c.name == 'buildkit') || (c.?securityContext.?allowPrivilegeEscalation.orValue(true) == false && c.?securityContext.?capabilities.?drop.orValue([]).exists(d, d == 'ALL') && c.?securityContext.?seccompProfile.?type.orValue('RuntimeDefault') == 'RuntimeDefault' && c.?securityContext.?appArmorProfile.?type.orValue('RuntimeDefault') != 'Unconfined'))"
+      message: "only container buildkit of the build pod may leave Pod Security restricted"
+    - expression: "!variables.build || (object.spec.containers.size() == 3 && ['jnlp', 'buildkit', 'tools'].all(n, object.spec.containers.exists(c, c.name == n)) && object.spec.?initContainers.orValue([]).size() == 0 && object.spec.?ephemeralContainers.orValue([]).size() == 0 && object.spec.containers.exists(c, c.name == 'buildkit' && c.image == 'docker.io/moby/buildkit:v0.34.2-rootless@sha256:c8252268760e1baba80780d63d738ef9f260fb7c7c0973c78494cb9ddd99eda1'))"
+      message: "a pod labeled build must match the build pod template"
+    - expression: "!variables.build || object.spec.?volumes.orValue([]).all(v, has(v.emptyDir) || has(v.persistentVolumeClaim))"
+      message: "the build pod may mount only emptyDir and claim volumes"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: ci-builds-guard
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+  labels:
+    app.kubernetes.io/name: ci-builds-guard
+    app.kubernetes.io/component: agents
+spec:
+  policyName: ci-builds-guard
+  validationActions: [Deny]
+  matchResources:
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: ci-build

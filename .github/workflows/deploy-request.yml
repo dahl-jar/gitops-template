@@ -1,0 +1,40 @@
+name: deploy-request
+
+on:
+  push:
+    branches: [prod, dev]
+    paths:
+      - 'versions/**/version*.yaml'
+      - 'infra/aws/deploy-hook/**'
+      - 'infra/aws/registry/**'
+      - 'environments/*.yaml'
+
+permissions: {}
+
+env:
+  # change this: the AWS region of the deploy queue
+  AWS_REGION: eu-west-1
+  # change this: the SSM parameter that stores the queue URL
+  QUEUE_URL_PARAMETER: /gitops/deploy/queue-url
+
+jobs:
+  request:
+    name: Request deploy
+    if: vars.AWS_DEPLOY_ROLE_ARN != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      id-token: write
+    steps:
+      - name: Assume the deploy request role
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Send the deploy request
+        run: |
+          set -euo pipefail
+          queue_url="$(aws ssm get-parameter --name "$QUEUE_URL_PARAMETER" --query Parameter.Value --output text)"
+          body="$(jq -nc --arg repo "$GITHUB_REPOSITORY" --arg ref "$GITHUB_REF" --arg sha "$GITHUB_SHA" '{repo:$repo,ref:$ref,sha:$sha}')"
+          aws sqs send-message --queue-url "$queue_url" --message-body "$body" > /dev/null

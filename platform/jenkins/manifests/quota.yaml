@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: ci-builds-quota
+  namespace: ci-builds
+  labels:
+    app.kubernetes.io/name: ci-builds-quota
+    app.kubernetes.io/component: agents
+spec:
+  hard:
+    pods: "4"
+    # change this: the memory of the CI node for agent pods
+    requests.memory: 10Gi
+    # change this: the memory of the CI node for agent pods
+    limits.memory: 10Gi
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: ci-builds-limits
+  namespace: ci-builds
+  labels:
+    app.kubernetes.io/name: ci-builds-limits
+    app.kubernetes.io/component: agents
+spec:
+  limits:
+    - type: Container
+      default:
+        memory: 256Mi
+      defaultRequest:
+        cpu: 100m
+        memory: 256Mi
+      max:
+        memory: 6Gi
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: ci-build-quota
+  namespace: ci-build
+  labels:
+    app.kubernetes.io/name: ci-build-quota
+    app.kubernetes.io/component: agents
+spec:
+  hard:
+    pods: "1"
+    # change this: the memory of the CI node for agent pods
+    requests.memory: 4Gi
+    # change this: the memory of the CI node for agent pods
+    limits.memory: 4Gi
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: ci-build-limits
+  namespace: ci-build
+  labels:
+    app.kubernetes.io/name: ci-build-limits
+    app.kubernetes.io/component: agents
+spec:
+  limits:
+    - type: Container
+      default:
+        memory: 256Mi
+      defaultRequest:
+        cpu: 100m
+        memory: 256Mi
+      max:
+        memory: 3Gi

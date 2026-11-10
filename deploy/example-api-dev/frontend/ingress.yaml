@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: example-web
+  namespace: example-dev
+  labels:
+    app.kubernetes.io/name: example-web
+    app.kubernetes.io/part-of: example
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/managed-by: argocd
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  ingressClassName: traefik
+  rules:
+    # change this: private host of the dev environment
+    - host: example-dev.home.arpa
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: example-web
+                port:
+                  number: 80

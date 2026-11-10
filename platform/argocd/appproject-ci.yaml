@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: ci
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: gitops
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: Jenkins, its build agents and the deploy hook listener
+  sourceRepos:
+    # change this: the GitOps repo
+    - git@github.com:your-org/gitops.git
+    - https://charts.jenkins.io
+  destinations:
+    - namespace: jenkins
+      server: https://kubernetes.default.svc
+    - namespace: ci-builds
+      server: https://kubernetes.default.svc
+    - namespace: ci-build
+      server: https://kubernetes.default.svc
+    - namespace: jenkins-hook
+      server: https://kubernetes.default.svc
+    - namespace: ""
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - { group: "", kind: Namespace }
+    - { group: admissionregistration.k8s.io, kind: ValidatingAdmissionPolicy }
+    - { group: admissionregistration.k8s.io, kind: ValidatingAdmissionPolicyBinding }
+  namespaceResourceWhitelist:
+    - { group: "", kind: ServiceAccount }
+    - { group: rbac.authorization.k8s.io, kind: Role }
+    - { group: rbac.authorization.k8s.io, kind: RoleBinding }
+    - { group: "", kind: ConfigMap }
+    - { group: "", kind: Service }
+    - { group: apps, kind: Deployment }
+    - { group: apps, kind: StatefulSet }
+    - { group: "", kind: PersistentVolumeClaim }
+    - { group: networking.k8s.io, kind: Ingress }
+    - { group: networking.k8s.io, kind: NetworkPolicy }
+    - { group: bitnami.com, kind: SealedSecret }
+    - { group: "", kind: ResourceQuota }
+    - { group: "", kind: LimitRange }

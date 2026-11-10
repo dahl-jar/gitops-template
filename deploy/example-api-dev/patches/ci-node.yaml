@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ci-node
+spec:
+  template:
+    spec:
+      nodeSelector:
+        # change this: label of the node that runs dev
+        node.example.com/role: ci
+      tolerations:
+        - key: ci
+          operator: Equal
+          value: "true"
+          effect: NoSchedule

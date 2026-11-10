@@ -1,0 +1,25 @@
+service: example-api
+# change this: GitHub repo of the app, as org/name
+repo: your-org/example-api
+# change this: test runner of the app repo, gradle or pnpm
+testSuite: gradle
+environments:
+  production:
+    # change this: branch of the app repo that a release is built from
+    releaseFrom: main
+    target: cluster
+    # change this: image path with the AWS account id and region
+    image: 123456789012.dkr.ecr.eu-west-1.amazonaws.com/example-api
+    versions: versions/example-api
+    versionFile: versions/example-api/version.yaml
+    overlay: deploy/example-api
+  dev:
+    # change this: branches of the app repo that deploy to dev
+    branches: [main]
+    target: cluster
+    # change this: image path with the AWS account id and region
+    image: 123456789012.dkr.ecr.eu-west-1.amazonaws.com/example-api
+    versions: versions/example-api-dev
+    versionFile: versions/example-api-dev/version-example-api.yaml
+    overlay: deploy/example-api-dev
+    config: dev

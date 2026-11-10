@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: example-api
+  namespace: example
+  labels:
+    app.kubernetes.io/part-of: example
+spec:
+  ingressClassName: traefik
+  rules:
+    # change this: public host of the API
+    - host: api.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: example-api
+                port:
+                  number: 80

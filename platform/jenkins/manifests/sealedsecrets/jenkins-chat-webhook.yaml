@@ -1,0 +1,11 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: jenkins-chat-webhook
+  namespace: jenkins
+spec:
+  encryptedData: {}
+  template:
+    metadata:
+      name: jenkins-chat-webhook
+      namespace: jenkins

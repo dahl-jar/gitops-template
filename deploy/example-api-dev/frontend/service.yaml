@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: example-web
+  namespace: example-dev
+  labels:
+    app.kubernetes.io/name: example-web
+    app.kubernetes.io/part-of: example
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/managed-by: argocd
+spec:
+  selector:
+    app.kubernetes.io/name: example-web
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

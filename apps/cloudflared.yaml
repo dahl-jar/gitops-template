@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudflared
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: gitops
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    # change this: SSH URL of the GitOps repo
+    repoURL: git@github.com:your-org/gitops.git
+    targetRevision: prod
+    path: platform/cloudflared
+    directory:
+      recurse: true
+      exclude: secret.example.yaml
+  destination:
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
+      - ServerSideApply=true

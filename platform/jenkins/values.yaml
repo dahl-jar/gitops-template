@@ -1,0 +1,1749 @@
+fullnameOverride: jenkins
+
+extraLabels:
+  app.kubernetes.io/part-of: ci
+
+controller:
+  image:
+    registry: docker.io
+    repository: jenkins/jenkins
+    tag: "2.580.2-jdk25@sha256:415ab90d4e3b25148f7191bc04f455a20817d6c4c3b0a98f6c6b0da4877f7081"
+    pullPolicy: IfNotPresent
+  nodeSelector:
+    # change this: the node that runs the Jenkins controller
+    kubernetes.io/hostname: node1
+  resources:
+    requests:
+      cpu: 200m
+      memory: 2Gi
+    limits:
+      cpu: null
+      memory: 2Gi
+  javaOpts: "-XX:MaxRAMPercentage=50 -XX:+UseSerialGC -XX:+ExitOnOutOfMemoryError"
+  probes:
+    startupProbe:
+      failureThreshold: 30
+  admin:
+    createSecret: false
+    existingSecret: jenkins-admin
+  installPlugins:
+    - antisamy-markup-formatter:173.v680e3a_b_69ff3
+    - apache-httpcomponents-client-4-api:4.5.14-269.vfa_2321039a_83
+    - apache-httpcomponents-client-5-api:5.6.5-209.vd1010d57ee17
+    - asm-api:9.11.1-226.vff833a_e4c58e
+    - audit-trail:472.vb_51e5934ec50
+    - authentication-tokens:1.144.v5ff4a_5ec5c33
+    - bootstrap5-api:5.3.8-1048.va_c299057e35c
+    - bouncycastle-api:2.30.1.86.2-310.v4655f6742752
+    - branch-api:2.1303.v9f3b_95dc329d
+    - caffeine-api:3.3.1-214.v18eb_56b_34920
+    - cloudbees-folder:6.1107.v31f8955765c8
+    - commons-compress-api:1.28.0-97.v0d8a_548e7f24
+    - commons-lang3-api:3.21.0-122.v6a_ea_4fd34049
+    - commons-text-api:1.15.0-218.va_61573470393
+    - configuration-as-code:2144.ve8c697101488
+    - credentials:1514.vb_01eb_014e7d4
+    - credentials-binding:728.v902a_273b_8947
+    - display-url-api:2.217.va_6b_de84cc74b_
+    - durable-task:686.v80ff80875b_82
+    - font-awesome-api:7.3.1-1013.v0835a_879ec6d
+    - generic-webhook-trigger:2.4.3
+    - git:5.11.0
+    - git-client:6.6.1
+    - github:1.47.0
+    - github-api:1.330-492.v3941a_032db_2a_
+    - github-branch-source:1986.v801e40614d00
+    - gson-api:2.15.0-212.v085f60a_8093b_
+    - http_request:1.659.v1b_9d9e942a_e6
+    - instance-identity:203.v15e81a_1b_7a_38
+    - ionicons-api:94.vcc3065403257
+    - jackson-annotations2-api:2.22-19.v10a_a_582ea_26e
+    - jackson2-api:2.22.4-449.v4ee9f4ec4123
+    - jackson3-api:3.2.4-103.vf5a_b_3f4ea_cec
+    - jakarta-activation-api:2.1.4-1
+    - jakarta-mail-api:2.1.5-1
+    - jakarta-xml-bind-api:4.0.9-19.v2b_a_5b_44d9a_1c
+    - javax-activation-api:1.2.0-8
+    - jaxb:2.3.9-143.v5979df3304e6
+    - jjwt-api:0.13.0-141.vd58b_a_9592b_6c
+    - job-dsl:3732.v9a_c49a_61a_313
+    - joda-time-api:2.15.1-211.ve499f52b_da_33
+    - json-api:20260814-226.v20f9685d642c
+    - json-path-api:3.0.0-218.vcd4dd1355de2
+    - kubernetes:4560.vc25b_83890c34
+    - kubernetes-client-api:7.3.1-256.v788a_0b_787114
+    - kubernetes-credentials:207.v492f58828b_ed
+    - lockable-resources:1582.v54e3b_a_8eda_3a_
+    - mailer:534.v1b_36f5864073
+    - matrix-auth:3.3
+    - metrics:4.2.37-494.v06f9a_939d33a_
+    - mina-sshd-api-common:2.19.0-192.v2b_a_7b_2c1dc71
+    - mina-sshd-api-core:2.19.0-192.v2b_a_7b_2c1dc71
+    - oidc-provider:234.vca_b_26b_f4b_dda_
+    - okhttp-api:5.5.0-242.v1482d48d3ea_3
+    - pipeline-build-step:601.v6d4c6d1a_9dc7
+    - pipeline-graph-view:1053.v9df19e6ceed2
+    - pipeline-groovy-lib:822.vc95f70dea_db_7
+    - pipeline-input-step:560.v56198a_642157
+    - pipeline-model-api:2.2293.v6e7193cec599
+    - pipeline-model-definition:2.2293.v6e7193cec599
+    - pipeline-model-extensions:2.2293.v6e7193cec599
+    - pipeline-stage-step:345.va_96187909426
+    - pipeline-stage-tags-metadata:2.2293.v6e7193cec599
+    - pipeline-utility-steps:3.810.va_7672d206740
+    - plain-credentials:199.v9f8e1f741799
+    - plugin-util-api:7.1403.vd380b_c42e90c
+    - prism-api:1.30.0-741.v034eb_0b_0a_a_fa_
+    - scm-api:728.vc30dcf7a_0df5
+    - script-security:1436.v1082791135e4
+    - snakeyaml-api:2.7-152.vc672728cf536
+    - snakeyaml-engine-api:3.2-18.v885ed7ff698f
+    - ssh-agent:433.v9e73d67c3f74
+    - ssh-credentials:372.va_250881b_08cd
+    - startup-trigger-plugin:2.9.4
+    - structs:362.va_b_695ef4fdf9
+    - token-macro:477.vd4f0dc3cb_cf1
+    - variant:70.va_d9f17f859e0
+    - woodstox-core-api:7.3.0-16.v017f30ed004c
+    - workflow-api:1429.v7a_1b_efb_a_f7c5
+    - workflow-basic-steps:1129.v60e3c7e6654d
+    - workflow-cps:4403.v471713a_cea_19
+    - workflow-durable-task-step:1479.v56e587f413a_7
+    - workflow-job:1622.vc41c189cb_e5f
+    - workflow-multibranch:842.v3a_b_59b_57b_e6e
+    - workflow-scm-step:487.v41313a_96b_65d
+    - workflow-step-api:724.v538c2362b_dfb_
+    - workflow-support:1028.vc22910142650
+  installLatestPlugins: false
+  installLatestSpecifiedPlugins: false
+  overwritePlugins: true
+  additionalExistingSecrets:
+    - { name: jenkins-github-app, keyName: app-id }
+    - { name: jenkins-github-app, keyName: private-key }
+    - { name: jenkins-gitops-deploy, keyName: private-key }
+    - { name: jenkins-cloudflare-pages, keyName: api-token }
+    - { name: jenkins-cloudflare-pages, keyName: account-id }
+    - { name: jenkins-chat-webhook, keyName: url }
+    - { name: jenkins-github-hook-token, keyName: token }
+    - { name: jenkins-oidc-signing-key, keyName: private-key }
+  JCasC:
+    defaultConfig: false
+    configScripts:
+      security: |
+        jenkins:
+          numExecutors: 0
+          mode: EXCLUSIVE
+          securityRealm:
+            local:
+              allowsSignup: false
+              enableCaptcha: false
+              users:
+                - id: "${chart-admin-username}"
+                  # change this: the display name of the admin user
+                  name: "Admin"
+                  password: "${chart-admin-password}"
+          authorizationStrategy:
+            globalMatrix:
+              entries:
+                - user:
+                    name: "${chart-admin-username}"
+                    permissions:
+                      - "Overall/Administer"
+          crumbIssuer: "standard"
+          markupFormatter: "plainText"
+        security:
+          apiToken:
+            creationOfLegacyTokenEnabled: false
+            tokenGenerationOnCreationEnabled: false
+            usageStatisticsEnabled: true
+          scriptApproval:
+            approvedScriptHashes:
+              - "SHA512:ecbe79f76376e9d7bc7afc187d0f7d10bb2549e7ad104897b9bf4738378f2057e07a517d97de2794b3b9e0604591acba38f277ee638cd0f09eebee7513689e4e"
+        unclassified:
+          location:
+            # change this: the Jenkins address
+            url: "https://jenkins.home.arpa/"
+          audit-trail:
+            logBuildCause: true
+            loggers:
+              - logFile:
+                  log: "/var/jenkins_home/audit/audit.log"
+                  limit: 10
+                  count: 5
+      cloud: |
+        jenkins:
+          slaveAgentPort: 50000
+          clouds:
+            - kubernetes:
+                name: "kubernetes"
+                serverUrl: "https://kubernetes.default"
+                skipTlsVerify: false
+                namespace: "ci-builds"
+                jenkinsUrl: "http://jenkins.jenkins.svc.cluster.local:8080"
+                jenkinsTunnel: "jenkins-agent.jenkins.svc.cluster.local:50000"
+                containerCapStr: "4"
+                connectTimeout: 5
+                readTimeout: 15
+                waitForPodSec: 600
+                templates:
+                  - name: "scan"
+                    label: "scan"
+                    nodeUsageMode: EXCLUSIVE
+                    serviceAccount: "jenkins-agent"
+                    instanceCap: 1
+                    idleMinutes: 0
+                    yamlMergeStrategy: "override"
+                    yaml: |
+                      apiVersion: v1
+                      kind: Pod
+                      metadata:
+                        labels:
+                          app.kubernetes.io/name: jenkins-agent
+                          app.kubernetes.io/component: scan
+                          app.kubernetes.io/part-of: ci
+                      spec:
+                        automountServiceAccountToken: false
+                        nodeSelector:
+                          # change this: the label of the CI node
+                          node.example.com/role: ci
+                        tolerations:
+                          - key: ci
+                            operator: Equal
+                            value: "true"
+                            effect: NoSchedule
+                        securityContext:
+                          runAsNonRoot: true
+                          runAsUser: 1000
+                          runAsGroup: 1000
+                          fsGroup: 1000
+                          seccompProfile:
+                            type: RuntimeDefault
+                        containers:
+                          - name: jnlp
+                            image: docker.io/jenkins/inbound-agent:3395.v6e5377b_0fb_3c-2-jdk25@sha256:0b61bd4b1bb99d3bed0abf35e6e512405eb0de77d34acf5958c8fe345cb209fd
+                            imagePullPolicy: IfNotPresent
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 100m
+                                memory: 256Mi
+                              limits:
+                                memory: 256Mi
+                          - name: trivy
+                            image: docker.io/aquasec/trivy:0.69.3@sha256:bcc376de8d77cfe086a917230e818dc9f8528e3c852f7b1aff648949b6258d1c
+                            imagePullPolicy: IfNotPresent
+                            command: ["cat"]
+                            tty: true
+                            env:
+                              - name: HOME
+                                value: /work
+                              - name: TRIVY_CACHE_DIR
+                                value: /trivy-cache
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 500m
+                                memory: 1Gi
+                              limits:
+                                memory: 1Gi
+                            volumeMounts:
+                              - name: work
+                                mountPath: /work
+                              - name: trivy-cache
+                                mountPath: /trivy-cache
+                          - name: tools
+                            # change this: the tools image and its digest
+                            image: 123456789012.dkr.ecr.eu-west-1.amazonaws.com/ci-tools:tools-v1@sha256:0000000000000000000000000000000000000000000000000000000000000000
+                            imagePullPolicy: IfNotPresent
+                            command: ["cat"]
+                            tty: true
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 100m
+                                memory: 512Mi
+                              limits:
+                                memory: 512Mi
+                            volumeMounts:
+                              - name: work
+                                mountPath: /work
+                        volumes:
+                          - name: work
+                            emptyDir: {}
+                          - name: trivy-cache
+                            persistentVolumeClaim:
+                              claimName: trivy-cache
+                  - name: "pin"
+                    label: "pin"
+                    nodeUsageMode: EXCLUSIVE
+                    serviceAccount: "jenkins-agent"
+                    instanceCap: 2
+                    idleMinutes: 0
+                    yamlMergeStrategy: "override"
+                    yaml: |
+                      apiVersion: v1
+                      kind: Pod
+                      metadata:
+                        labels:
+                          app.kubernetes.io/name: jenkins-agent
+                          app.kubernetes.io/component: pin
+                          app.kubernetes.io/part-of: ci
+                      spec:
+                        automountServiceAccountToken: false
+                        nodeSelector:
+                          # change this: the label of the CI node
+                          node.example.com/role: ci
+                        tolerations:
+                          - key: ci
+                            operator: Equal
+                            value: "true"
+                            effect: NoSchedule
+                        securityContext:
+                          runAsNonRoot: true
+                          runAsUser: 1000
+                          runAsGroup: 1000
+                          fsGroup: 1000
+                          seccompProfile:
+                            type: RuntimeDefault
+                        containers:
+                          - name: jnlp
+                            image: docker.io/jenkins/inbound-agent:3395.v6e5377b_0fb_3c-2-jdk25@sha256:0b61bd4b1bb99d3bed0abf35e6e512405eb0de77d34acf5958c8fe345cb209fd
+                            imagePullPolicy: IfNotPresent
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 100m
+                                memory: 256Mi
+                              limits:
+                                memory: 256Mi
+                          - name: tools
+                            # change this: the tools image and its digest
+                            image: 123456789012.dkr.ecr.eu-west-1.amazonaws.com/ci-tools:tools-v1@sha256:0000000000000000000000000000000000000000000000000000000000000000
+                            imagePullPolicy: IfNotPresent
+                            command: ["cat"]
+                            tty: true
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 100m
+                                memory: 512Mi
+                              limits:
+                                memory: 512Mi
+                            volumeMounts:
+                              - name: work
+                                mountPath: /work
+                        volumes:
+                          - name: work
+                            emptyDir: {}
+                  - name: "terraform"
+                    label: "terraform"
+                    nodeUsageMode: EXCLUSIVE
+                    serviceAccount: "jenkins-agent"
+                    instanceCap: 1
+                    idleMinutes: 0
+                    yamlMergeStrategy: "override"
+                    yaml: |
+                      apiVersion: v1
+                      kind: Pod
+                      metadata:
+                        labels:
+                          app.kubernetes.io/name: jenkins-agent
+                          app.kubernetes.io/component: terraform
+                          app.kubernetes.io/part-of: ci
+                      spec:
+                        automountServiceAccountToken: false
+                        nodeSelector:
+                          # change this: the label of the CI node
+                          node.example.com/role: ci
+                        tolerations:
+                          - key: ci
+                            operator: Equal
+                            value: "true"
+                            effect: NoSchedule
+                        securityContext:
+                          runAsNonRoot: true
+                          runAsUser: 1000
+                          runAsGroup: 1000
+                          fsGroup: 1000
+                          seccompProfile:
+                            type: RuntimeDefault
+                        containers:
+                          - name: jnlp
+                            image: docker.io/jenkins/inbound-agent:3395.v6e5377b_0fb_3c-2-jdk25@sha256:0b61bd4b1bb99d3bed0abf35e6e512405eb0de77d34acf5958c8fe345cb209fd
+                            imagePullPolicy: IfNotPresent
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 100m
+                                memory: 256Mi
+                              limits:
+                                memory: 256Mi
+                          - name: tools
+                            # change this: the tools image and its digest
+                            image: 123456789012.dkr.ecr.eu-west-1.amazonaws.com/ci-tools:tools-v1@sha256:0000000000000000000000000000000000000000000000000000000000000000
+                            imagePullPolicy: IfNotPresent
+                            command: ["cat"]
+                            tty: true
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 250m
+                                memory: 1Gi
+                              limits:
+                                memory: 1Gi
+                  - name: "pages"
+                    label: "pages"
+                    nodeUsageMode: EXCLUSIVE
+                    serviceAccount: "jenkins-agent"
+                    instanceCap: 1
+                    idleMinutes: 0
+                    yamlMergeStrategy: "override"
+                    yaml: |
+                      apiVersion: v1
+                      kind: Pod
+                      metadata:
+                        labels:
+                          app.kubernetes.io/name: jenkins-agent
+                          app.kubernetes.io/component: pages
+                          app.kubernetes.io/part-of: ci
+                      spec:
+                        automountServiceAccountToken: false
+                        nodeSelector:
+                          # change this: the label of the CI node
+                          node.example.com/role: ci
+                        tolerations:
+                          - key: ci
+                            operator: Equal
+                            value: "true"
+                            effect: NoSchedule
+                        securityContext:
+                          runAsNonRoot: true
+                          runAsUser: 1000
+                          runAsGroup: 1000
+                          fsGroup: 1000
+                          seccompProfile:
+                            type: RuntimeDefault
+                        containers:
+                          - name: jnlp
+                            image: docker.io/jenkins/inbound-agent:3395.v6e5377b_0fb_3c-2-jdk25@sha256:0b61bd4b1bb99d3bed0abf35e6e512405eb0de77d34acf5958c8fe345cb209fd
+                            imagePullPolicy: IfNotPresent
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 100m
+                                memory: 256Mi
+                              limits:
+                                memory: 256Mi
+                          - name: node
+                            image: docker.io/library/node:22.22.3-bookworm-slim@sha256:e21fc383b50d5347dc7a9f1cae45b8f4e2f0d39f7ade28e4eef7d2934522b752
+                            imagePullPolicy: IfNotPresent
+                            command: ["cat"]
+                            tty: true
+                            env:
+                              - name: HOME
+                                value: /work
+                              - name: PATH
+                                value: /work/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 1000m
+                                memory: 2Gi
+                              limits:
+                                memory: 2Gi
+                            volumeMounts:
+                              - name: work
+                                mountPath: /work
+                          - name: tools
+                            # change this: the tools image and its digest
+                            image: 123456789012.dkr.ecr.eu-west-1.amazonaws.com/ci-tools:tools-v1@sha256:0000000000000000000000000000000000000000000000000000000000000000
+                            imagePullPolicy: IfNotPresent
+                            command: ["cat"]
+                            tty: true
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 100m
+                                memory: 1Gi
+                              limits:
+                                memory: 1Gi
+                            volumeMounts:
+                              - name: work
+                                mountPath: /work
+                          - name: osv
+                            image: ghcr.io/google/osv-scanner:v2.7.0@sha256:4f3b7e2c64b9d38a5febc5a7e4a3dfef1d1362f726dea7a2ef4762b46469fcd0
+                            imagePullPolicy: IfNotPresent
+                            command: ["cat"]
+                            tty: true
+                            env:
+                              - name: HOME
+                                value: /work
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 100m
+                                memory: 256Mi
+                              limits:
+                                memory: 256Mi
+                            volumeMounts:
+                              - name: work
+                                mountPath: /work
+                        volumes:
+                          - name: work
+                            emptyDir: {}
+                  # change this: the test pod of example-api
+                  - name: "test-example-api"
+                    label: "test-example-api"
+                    nodeUsageMode: EXCLUSIVE
+                    serviceAccount: "jenkins-agent"
+                    instanceCap: 1
+                    idleMinutes: 0
+                    yamlMergeStrategy: "override"
+                    yaml: |
+                      apiVersion: v1
+                      kind: Pod
+                      metadata:
+                        labels:
+                          app.kubernetes.io/name: jenkins-agent
+                          app.kubernetes.io/component: test
+                          app.kubernetes.io/part-of: ci
+                      spec:
+                        automountServiceAccountToken: false
+                        nodeSelector:
+                          # change this: the label of the CI node
+                          node.example.com/role: ci
+                        tolerations:
+                          - key: ci
+                            operator: Equal
+                            value: "true"
+                            effect: NoSchedule
+                        securityContext:
+                          runAsNonRoot: true
+                          runAsUser: 1000
+                          runAsGroup: 1000
+                          fsGroup: 1000
+                          seccompProfile:
+                            type: RuntimeDefault
+                        containers:
+                          - name: jnlp
+                            image: docker.io/jenkins/inbound-agent:3395.v6e5377b_0fb_3c-2-jdk25@sha256:0b61bd4b1bb99d3bed0abf35e6e512405eb0de77d34acf5958c8fe345cb209fd
+                            imagePullPolicy: IfNotPresent
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 100m
+                                memory: 256Mi
+                              limits:
+                                memory: 256Mi
+                          - name: gradle
+                            image: docker.io/library/eclipse-temurin:25.0.5_8-jdk-noble@sha256:95e350ad1eb738f943e141640f7e3d797e483359a3b33c3864255bfd1ad71f8a
+                            imagePullPolicy: IfNotPresent
+                            command: ["sh", "-c", "sleep infinity & wait"]
+                            tty: true
+                            env:
+                              - name: HOME
+                                value: /work
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 1500m
+                                memory: 4Gi
+                              limits:
+                                memory: 4Gi
+                            volumeMounts:
+                              - name: work
+                                mountPath: /work
+                              - name: gradle-cache
+                                mountPath: /cache
+                                readOnly: true
+                          - name: trivy
+                            image: docker.io/aquasec/trivy:0.69.3@sha256:bcc376de8d77cfe086a917230e818dc9f8528e3c852f7b1aff648949b6258d1c
+                            imagePullPolicy: IfNotPresent
+                            command: ["cat"]
+                            tty: true
+                            env:
+                              - name: HOME
+                                value: /work
+                              - name: TRIVY_CACHE_DIR
+                                value: /trivy-cache
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 250m
+                                memory: 1Gi
+                              limits:
+                                memory: 1Gi
+                            volumeMounts:
+                              - name: work
+                                mountPath: /work
+                              - name: trivy-cache
+                                mountPath: /trivy-cache
+                                readOnly: true
+                        volumes:
+                          - name: work
+                            emptyDir: {}
+                          - name: gradle-cache
+                            persistentVolumeClaim:
+                              claimName: gradle-cache
+                              readOnly: true
+                          - name: trivy-cache
+                            persistentVolumeClaim:
+                              claimName: trivy-cache
+                              readOnly: true
+                  # change this: the dev test pod of example-api
+                  - name: "test-example-api-dev"
+                    label: "test-example-api-dev"
+                    nodeUsageMode: EXCLUSIVE
+                    serviceAccount: "jenkins-agent"
+                    instanceCap: 1
+                    idleMinutes: 0
+                    yamlMergeStrategy: "override"
+                    yaml: |
+                      apiVersion: v1
+                      kind: Pod
+                      metadata:
+                        labels:
+                          app.kubernetes.io/name: jenkins-agent
+                          app.kubernetes.io/component: test
+                          app.kubernetes.io/part-of: ci
+                      spec:
+                        automountServiceAccountToken: false
+                        nodeSelector:
+                          # change this: the label of the CI node
+                          node.example.com/role: ci
+                        tolerations:
+                          - key: ci
+                            operator: Equal
+                            value: "true"
+                            effect: NoSchedule
+                        securityContext:
+                          runAsNonRoot: true
+                          runAsUser: 1000
+                          runAsGroup: 1000
+                          fsGroup: 1000
+                          seccompProfile:
+                            type: RuntimeDefault
+                        containers:
+                          - name: jnlp
+                            image: docker.io/jenkins/inbound-agent:3395.v6e5377b_0fb_3c-2-jdk25@sha256:0b61bd4b1bb99d3bed0abf35e6e512405eb0de77d34acf5958c8fe345cb209fd
+                            imagePullPolicy: IfNotPresent
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 100m
+                                memory: 256Mi
+                              limits:
+                                memory: 256Mi
+                          - name: gradle
+                            image: docker.io/library/eclipse-temurin:25.0.5_8-jdk-noble@sha256:95e350ad1eb738f943e141640f7e3d797e483359a3b33c3864255bfd1ad71f8a
+                            imagePullPolicy: IfNotPresent
+                            command: ["sh", "-c", "sleep infinity & wait"]
+                            tty: true
+                            env:
+                              - name: HOME
+                                value: /work
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 1500m
+                                memory: 4Gi
+                              limits:
+                                memory: 4Gi
+                            volumeMounts:
+                              - name: work
+                                mountPath: /work
+                          - name: trivy
+                            image: docker.io/aquasec/trivy:0.69.3@sha256:bcc376de8d77cfe086a917230e818dc9f8528e3c852f7b1aff648949b6258d1c
+                            imagePullPolicy: IfNotPresent
+                            command: ["cat"]
+                            tty: true
+                            env:
+                              - name: HOME
+                                value: /work
+                              - name: TRIVY_CACHE_DIR
+                                value: /trivy-cache
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 250m
+                                memory: 1Gi
+                              limits:
+                                memory: 1Gi
+                            volumeMounts:
+                              - name: work
+                                mountPath: /work
+                              - name: trivy-cache
+                                mountPath: /trivy-cache
+                                readOnly: true
+                        volumes:
+                          - name: work
+                            emptyDir: {}
+                          - name: trivy-cache
+                            persistentVolumeClaim:
+                              claimName: trivy-cache
+                              readOnly: true
+                  # change this: the test pod of example-web
+                  - name: "test-example-web"
+                    label: "test-example-web"
+                    nodeUsageMode: EXCLUSIVE
+                    serviceAccount: "jenkins-agent"
+                    instanceCap: 1
+                    idleMinutes: 0
+                    yamlMergeStrategy: "override"
+                    yaml: |
+                      apiVersion: v1
+                      kind: Pod
+                      metadata:
+                        labels:
+                          app.kubernetes.io/name: jenkins-agent
+                          app.kubernetes.io/component: test
+                          app.kubernetes.io/part-of: ci
+                      spec:
+                        automountServiceAccountToken: false
+                        nodeSelector:
+                          # change this: the label of the CI node
+                          node.example.com/role: ci
+                        tolerations:
+                          - key: ci
+                            operator: Equal
+                            value: "true"
+                            effect: NoSchedule
+                        securityContext:
+                          runAsNonRoot: true
+                          runAsUser: 1000
+                          runAsGroup: 1000
+                          fsGroup: 1000
+                          seccompProfile:
+                            type: RuntimeDefault
+                        containers:
+                          - name: jnlp
+                            image: docker.io/jenkins/inbound-agent:3395.v6e5377b_0fb_3c-2-jdk25@sha256:0b61bd4b1bb99d3bed0abf35e6e512405eb0de77d34acf5958c8fe345cb209fd
+                            imagePullPolicy: IfNotPresent
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 100m
+                                memory: 256Mi
+                              limits:
+                                memory: 256Mi
+                          - name: node
+                            image: docker.io/library/node:22.22.3-bookworm-slim@sha256:e21fc383b50d5347dc7a9f1cae45b8f4e2f0d39f7ade28e4eef7d2934522b752
+                            imagePullPolicy: IfNotPresent
+                            command: ["sh", "-c", "sleep infinity & wait"]
+                            tty: true
+                            env:
+                              - name: HOME
+                                value: /work
+                              - name: PATH
+                                value: /work/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 1000m
+                                memory: 3Gi
+                              limits:
+                                memory: 3Gi
+                            volumeMounts:
+                              - name: work
+                                mountPath: /work
+                              - name: pnpm-cache
+                                mountPath: /cache
+                                readOnly: true
+                        volumes:
+                          - name: work
+                            emptyDir: {}
+                          - name: pnpm-cache
+                            persistentVolumeClaim:
+                              claimName: pnpm-cache
+                              readOnly: true
+                  # change this: the dev test pod of example-web
+                  - name: "test-example-web-dev"
+                    label: "test-example-web-dev"
+                    nodeUsageMode: EXCLUSIVE
+                    serviceAccount: "jenkins-agent"
+                    instanceCap: 1
+                    idleMinutes: 0
+                    yamlMergeStrategy: "override"
+                    yaml: |
+                      apiVersion: v1
+                      kind: Pod
+                      metadata:
+                        labels:
+                          app.kubernetes.io/name: jenkins-agent
+                          app.kubernetes.io/component: test
+                          app.kubernetes.io/part-of: ci
+                      spec:
+                        automountServiceAccountToken: false
+                        nodeSelector:
+                          # change this: the label of the CI node
+                          node.example.com/role: ci
+                        tolerations:
+                          - key: ci
+                            operator: Equal
+                            value: "true"
+                            effect: NoSchedule
+                        securityContext:
+                          runAsNonRoot: true
+                          runAsUser: 1000
+                          runAsGroup: 1000
+                          fsGroup: 1000
+                          seccompProfile:
+                            type: RuntimeDefault
+                        containers:
+                          - name: jnlp
+                            image: docker.io/jenkins/inbound-agent:3395.v6e5377b_0fb_3c-2-jdk25@sha256:0b61bd4b1bb99d3bed0abf35e6e512405eb0de77d34acf5958c8fe345cb209fd
+                            imagePullPolicy: IfNotPresent
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 100m
+                                memory: 256Mi
+                              limits:
+                                memory: 256Mi
+                          - name: node
+                            image: docker.io/library/node:22.22.3-bookworm-slim@sha256:e21fc383b50d5347dc7a9f1cae45b8f4e2f0d39f7ade28e4eef7d2934522b752
+                            imagePullPolicy: IfNotPresent
+                            command: ["sh", "-c", "sleep infinity & wait"]
+                            tty: true
+                            env:
+                              - name: HOME
+                                value: /work
+                              - name: PATH
+                                value: /work/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 1000m
+                                memory: 3Gi
+                              limits:
+                                memory: 3Gi
+                            volumeMounts:
+                              - name: work
+                                mountPath: /work
+                        volumes:
+                          - name: work
+                            emptyDir: {}
+                  - name: "fetch"
+                    label: "fetch"
+                    nodeUsageMode: EXCLUSIVE
+                    serviceAccount: "jenkins-agent"
+                    instanceCap: 1
+                    idleMinutes: 0
+                    yamlMergeStrategy: "override"
+                    yaml: |
+                      apiVersion: v1
+                      kind: Pod
+                      metadata:
+                        labels:
+                          app.kubernetes.io/name: jenkins-agent
+                          app.kubernetes.io/component: fetch
+                          app.kubernetes.io/part-of: ci
+                      spec:
+                        automountServiceAccountToken: false
+                        nodeSelector:
+                          # change this: the label of the CI node
+                          node.example.com/role: ci
+                        tolerations:
+                          - key: ci
+                            operator: Equal
+                            value: "true"
+                            effect: NoSchedule
+                        securityContext:
+                          runAsNonRoot: true
+                          runAsUser: 1000
+                          runAsGroup: 1000
+                          fsGroup: 1000
+                          seccompProfile:
+                            type: RuntimeDefault
+                        containers:
+                          - name: jnlp
+                            image: docker.io/jenkins/inbound-agent:3395.v6e5377b_0fb_3c-2-jdk25@sha256:0b61bd4b1bb99d3bed0abf35e6e512405eb0de77d34acf5958c8fe345cb209fd
+                            imagePullPolicy: IfNotPresent
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 100m
+                                memory: 256Mi
+                              limits:
+                                memory: 256Mi
+                          - name: tools
+                            # change this: the tools image and its digest
+                            image: 123456789012.dkr.ecr.eu-west-1.amazonaws.com/ci-tools:tools-v1@sha256:0000000000000000000000000000000000000000000000000000000000000000
+                            imagePullPolicy: IfNotPresent
+                            command: ["cat"]
+                            tty: true
+                            env:
+                              - name: HOME
+                                value: /work
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 200m
+                                memory: 1Gi
+                              limits:
+                                memory: 1Gi
+                            volumeMounts:
+                              - name: work
+                                mountPath: /work
+                              - name: gradle-cache
+                                mountPath: /gradle-cache
+                              - name: pnpm-cache
+                                mountPath: /pnpm-cache
+                          - name: osv
+                            image: ghcr.io/google/osv-scanner:v2.7.0@sha256:4f3b7e2c64b9d38a5febc5a7e4a3dfef1d1362f726dea7a2ef4762b46469fcd0
+                            imagePullPolicy: IfNotPresent
+                            command: ["cat"]
+                            tty: true
+                            env:
+                              - name: HOME
+                                value: /work
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 100m
+                                memory: 512Mi
+                              limits:
+                                memory: 512Mi
+                            volumeMounts:
+                              - name: work
+                                mountPath: /work
+                        volumes:
+                          - name: work
+                            emptyDir: {}
+                          - name: gradle-cache
+                            persistentVolumeClaim:
+                              claimName: gradle-cache
+                          - name: pnpm-cache
+                            persistentVolumeClaim:
+                              claimName: pnpm-cache
+                  - name: "fetch-dev"
+                    label: "fetch-dev"
+                    nodeUsageMode: EXCLUSIVE
+                    serviceAccount: "jenkins-agent"
+                    instanceCap: 1
+                    idleMinutes: 0
+                    yamlMergeStrategy: "override"
+                    yaml: |
+                      apiVersion: v1
+                      kind: Pod
+                      metadata:
+                        labels:
+                          app.kubernetes.io/name: jenkins-agent
+                          app.kubernetes.io/component: fetch-dev
+                          app.kubernetes.io/part-of: ci
+                      spec:
+                        automountServiceAccountToken: false
+                        nodeSelector:
+                          # change this: the label of the CI node
+                          node.example.com/role: ci
+                        tolerations:
+                          - key: ci
+                            operator: Equal
+                            value: "true"
+                            effect: NoSchedule
+                        securityContext:
+                          runAsNonRoot: true
+                          runAsUser: 1000
+                          runAsGroup: 1000
+                          fsGroup: 1000
+                          seccompProfile:
+                            type: RuntimeDefault
+                        containers:
+                          - name: jnlp
+                            image: docker.io/jenkins/inbound-agent:3395.v6e5377b_0fb_3c-2-jdk25@sha256:0b61bd4b1bb99d3bed0abf35e6e512405eb0de77d34acf5958c8fe345cb209fd
+                            imagePullPolicy: IfNotPresent
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 100m
+                                memory: 256Mi
+                              limits:
+                                memory: 256Mi
+                          - name: tools
+                            # change this: the tools image and its digest
+                            image: 123456789012.dkr.ecr.eu-west-1.amazonaws.com/ci-tools:tools-v1@sha256:0000000000000000000000000000000000000000000000000000000000000000
+                            imagePullPolicy: IfNotPresent
+                            command: ["cat"]
+                            tty: true
+                            env:
+                              - name: HOME
+                                value: /work
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 200m
+                                memory: 1Gi
+                              limits:
+                                memory: 1Gi
+                            volumeMounts:
+                              - name: work
+                                mountPath: /work
+                          - name: osv
+                            image: ghcr.io/google/osv-scanner:v2.7.0@sha256:4f3b7e2c64b9d38a5febc5a7e4a3dfef1d1362f726dea7a2ef4762b46469fcd0
+                            imagePullPolicy: IfNotPresent
+                            command: ["cat"]
+                            tty: true
+                            env:
+                              - name: HOME
+                                value: /work
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 100m
+                                memory: 512Mi
+                              limits:
+                                memory: 512Mi
+                            volumeMounts:
+                              - name: work
+                                mountPath: /work
+                        volumes:
+                          - name: work
+                            emptyDir: {}
+                  - name: "build"
+                    label: "build"
+                    namespace: "ci-build"
+                    nodeUsageMode: EXCLUSIVE
+                    serviceAccount: "jenkins-agent"
+                    instanceCap: 1
+                    idleMinutes: 0
+                    yamlMergeStrategy: "override"
+                    yaml: |
+                      apiVersion: v1
+                      kind: Pod
+                      metadata:
+                        labels:
+                          app.kubernetes.io/name: jenkins-agent
+                          app.kubernetes.io/component: build
+                          app.kubernetes.io/part-of: ci
+                      spec:
+                        automountServiceAccountToken: false
+                        nodeSelector:
+                          # change this: the label of the CI node
+                          node.example.com/role: ci
+                        tolerations:
+                          - key: ci
+                            operator: Equal
+                            value: "true"
+                            effect: NoSchedule
+                        securityContext:
+                          runAsNonRoot: true
+                          runAsUser: 1000
+                          runAsGroup: 1000
+                          fsGroup: 1000
+                          seccompProfile:
+                            type: RuntimeDefault
+                        containers:
+                          - name: jnlp
+                            image: docker.io/jenkins/inbound-agent:3395.v6e5377b_0fb_3c-2-jdk25@sha256:0b61bd4b1bb99d3bed0abf35e6e512405eb0de77d34acf5958c8fe345cb209fd
+                            imagePullPolicy: IfNotPresent
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 100m
+                                memory: 256Mi
+                              limits:
+                                memory: 256Mi
+                          - name: buildkit
+                            image: docker.io/moby/buildkit:v0.34.2-rootless@sha256:c8252268760e1baba80780d63d738ef9f260fb7c7c0973c78494cb9ddd99eda1
+                            imagePullPolicy: IfNotPresent
+                            command: ["cat"]
+                            tty: true
+                            env:
+                              - name: BUILDKITD_FLAGS
+                                value: --oci-worker-no-process-sandbox --oci-worker-gc-keepstorage=2000,0,8000
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              seccompProfile:
+                                type: Unconfined
+                              appArmorProfile:
+                                type: Unconfined
+                            resources:
+                              requests:
+                                cpu: 1000m
+                                memory: 3Gi
+                              limits:
+                                memory: 3Gi
+                            volumeMounts:
+                              - name: work
+                                mountPath: /work
+                              - name: buildkit-cache
+                                mountPath: /home/user/.local/share/buildkit
+                          - name: tools
+                            # change this: the tools image and its digest
+                            image: 123456789012.dkr.ecr.eu-west-1.amazonaws.com/ci-tools:tools-v1@sha256:0000000000000000000000000000000000000000000000000000000000000000
+                            imagePullPolicy: IfNotPresent
+                            command: ["cat"]
+                            tty: true
+                            securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              runAsGroup: 1000
+                              allowPrivilegeEscalation: false
+                              capabilities:
+                                drop: ["ALL"]
+                              seccompProfile:
+                                type: RuntimeDefault
+                            resources:
+                              requests:
+                                cpu: 100m
+                                memory: 512Mi
+                              limits:
+                                memory: 512Mi
+                            volumeMounts:
+                              - name: work
+                                mountPath: /work
+                        volumes:
+                          - name: work
+                            emptyDir: {}
+                          - name: buildkit-cache
+                            persistentVolumeClaim:
+                              claimName: buildkit-cache
+      aws-identity: |
+        jenkins:
+          globalNodeProperties:
+            - envVars:
+                env:
+                  - key: "AWS_REGION"
+                    # change this: the AWS region
+                    value: "eu-west-1"
+                  - key: "AWS_DEFAULT_REGION"
+                    # change this: the AWS region
+                    value: "eu-west-1"
+                  - key: "AWS_ROLE_TERRAFORM"
+                    # change this: the role ARN from the Terraform output
+                    value: "arn:aws:iam::123456789012:role/gitops/gitops-terraform"
+                  - key: "AWS_ROLE_CONFIG_READ"
+                    # change this: the role ARN from the Terraform output
+                    value: "arn:aws:iam::123456789012:role/gitops/gitops-deploy-config-read"
+                  - key: "AWS_ROLE_IMAGE_SIGNING"
+                    # change this: the role ARN from the Terraform output
+                    value: "arn:aws:iam::123456789012:role/gitops/gitops-image-signing"
+                  - key: "AWS_ROLE_ECR_PUSH"
+                    # change this: the role ARN from the Terraform output
+                    value: "arn:aws:iam::123456789012:role/gitops/gitops-jenkins-push"
+                  - key: "AWS_ROLE_ECR_PULL"
+                    # change this: the role ARN from the Terraform output
+                    value: "arn:aws:iam::123456789012:role/gitops/gitops-jenkins-pull"
+                  - key: "AWS_ROLE_DEPENDENCY_FETCH"
+                    # change this: the role ARN from the Terraform output
+                    value: "arn:aws:iam::123456789012:role/gitops/gitops-eu-west-1-prod-dependency-fetch"
+                  - key: "CODEARTIFACT_DOMAIN"
+                    # change this: the CodeArtifact domain
+                    value: "gitops-eu-west-1-prod-dependencies"
+                  - key: "CODEARTIFACT_DOMAIN_OWNER"
+                    # change this: the AWS account id
+                    value: "123456789012"
+        security:
+          idToken:
+            tokenLifetime: 900
+            buildClaimTemplates:
+              - name: "sub"
+                format: "^${JOB_NAME}"
+                type: "string"
+              - name: "build_number"
+                format: "^${BUILD_NUMBER}"
+                type: "integer"
+      credentials: |
+        credentials:
+          system:
+            domainCredentials:
+              - credentials:
+                  - gitHubApp:
+                      id: "github-app"
+                      appID: "${jenkins-github-app-app-id}"
+                      privateKey: "${jenkins-github-app-private-key}"
+                      # change this: the GitHub org of the GitHub App
+                      owner: "your-org"
+                  - basicSSHUserPrivateKey:
+                      id: "gitops-deploy"
+                      scope: GLOBAL
+                      username: "git"
+                      privateKeySource:
+                        directEntry:
+                          privateKey: "${jenkins-gitops-deploy-private-key}"
+                  - usernamePassword:
+                      id: "cloudflare-pages"
+                      scope: GLOBAL
+                      username: "${jenkins-cloudflare-pages-account-id}"
+                      usernameSecret: true
+                      password: "${jenkins-cloudflare-pages-api-token}"
+                  - string:
+                      id: "chat-webhook"
+                      scope: GLOBAL
+                      secret: "${jenkins-chat-webhook-url}"
+                  - string:
+                      id: "github-hook-token"
+                      scope: GLOBAL
+                      secret: "${jenkins-github-hook-token-token}"
+                  - idTokenFile:
+                      id: "aws-infra"
+                      scope: GLOBAL
+                      description: "AWS Terraform"
+                      # change this: the OIDC issuer address
+                      issuer: "https://gitops-jenkins-oidc-123456789012.s3.eu-west-1.amazonaws.com/jenkins"
+                      audience: "aws-infra"
+                  - idTokenFile:
+                      id: "aws-config-read"
+                      scope: GLOBAL
+                      description: "AWS config read"
+                      # change this: the OIDC issuer address
+                      issuer: "https://gitops-jenkins-oidc-123456789012.s3.eu-west-1.amazonaws.com/jenkins"
+                      audience: "aws-config-read"
+                  - idTokenFile:
+                      id: "aws-image-signing"
+                      scope: GLOBAL
+                      description: "AWS image signing"
+                      # change this: the OIDC issuer address
+                      issuer: "https://gitops-jenkins-oidc-123456789012.s3.eu-west-1.amazonaws.com/jenkins"
+                      audience: "aws-image-signing"
+                  - idTokenFile:
+                      id: "aws-image-push"
+                      scope: GLOBAL
+                      description: "AWS image push"
+                      # change this: the OIDC issuer address
+                      issuer: "https://gitops-jenkins-oidc-123456789012.s3.eu-west-1.amazonaws.com/jenkins"
+                      audience: "aws-image-push"
+                  - idTokenFile:
+                      id: "aws-image-pull"
+                      scope: GLOBAL
+                      description: "AWS image pull"
+                      # change this: the OIDC issuer address
+                      issuer: "https://gitops-jenkins-oidc-123456789012.s3.eu-west-1.amazonaws.com/jenkins"
+                      audience: "aws-image-pull"
+                  - idTokenFile:
+                      id: "aws-dependency-fetch"
+                      scope: GLOBAL
+                      description: "AWS dependency fetch"
+                      # change this: the OIDC issuer address
+                      issuer: "https://gitops-jenkins-oidc-123456789012.s3.eu-west-1.amazonaws.com/jenkins"
+                      audience: "aws-dependency-fetch"
+      libraries: |
+        unclassified:
+          globalLibraries:
+            libraries:
+              - name: "ci"
+                # change this: the commit of the pipeline library
+                defaultVersion: "0000000000000000000000000000000000000000"
+                allowVersionOverride: false
+                implicit: false
+                includeInChangesets: false
+                retriever:
+                  modernSCM:
+                    scm:
+                      git:
+                        id: "ci-library"
+                        # change this: the pipeline library repo
+                        remote: "https://github.com/your-org/ci-library.git"
+                        credentialsId: "github-app"
+                        traits:
+                          - "gitBranchDiscovery"
+                          - "gitTagDiscovery"
+      jobs: |
+        jobs:
+          - script: |
+              def libraryJob(String name, List<String> params, String call, String schedule) {
+                pipelineJob(name) {
+                  if (params) {
+                    parameters {
+                      params.each { stringParam(it, '', '') }
+                    }
+                  }
+                  properties {
+                    buildDiscarder {
+                      strategy {
+                        logRotator {
+                          daysToKeepStr('')
+                          numToKeepStr('20')
+                          artifactDaysToKeepStr('')
+                          artifactNumToKeepStr('')
+                        }
+                      }
+                    }
+                    disableConcurrentBuilds()
+                    if (schedule) {
+                      pipelineTriggers {
+                        triggers {
+                          cron {
+                            spec(schedule)
+                          }
+                        }
+                      }
+                    }
+                  }
+                  definition {
+                    cps {
+                      script("@Library('ci') _\n" + call)
+                      sandbox(true)
+                    }
+                  }
+                }
+              }
+
+              libraryJob('check-certificates', [], 'checkCertificates()', 'H 6 * * 1')
+              libraryJob('infra-aws', ['SHA'], 'applyTerraform()', '')
+              libraryJob('scan-production-images', [], 'scanImages()', 'H 4 * * 1')
+              libraryJob('trivy-db-refresh', [], 'refreshTrivyDb()', 'H 3 * * *')
+
+              pipelineJob('seed-apps') {
+                properties {
+                  buildDiscarder {
+                    strategy {
+                      logRotator {
+                        daysToKeepStr('')
+                        numToKeepStr('20')
+                        artifactDaysToKeepStr('')
+                        artifactNumToKeepStr('')
+                      }
+                    }
+                  }
+                  disableConcurrentBuilds()
+                  pipelineTriggers {
+                    triggers {
+                      cron {
+                        spec('H 5 * * *')
+                      }
+                      hudsonStartupTrigger {
+                        label('')
+                        quietPeriod('0')
+                        nodeParameterName('')
+                        runOnChoice('ON_CONNECT')
+                      }
+                    }
+                  }
+                }
+                definition {
+                  cps {
+                    script('''node('pin') {
+                stage('Checkout') {
+                  // change this: the GitOps repo
+                  git(url: 'https://github.com/your-org/gitops.git', branch: 'prod', credentialsId: 'github-app')
+                }
+                stage('Map apps') {
+                  container('tools') {
+                    sh 'python3 scripts/app_jobs.py environments > app-jobs.json'
+                  }
+                }
+                stage('Generate jobs') {
+                  jobDsl(scriptText: readFile(file: 'platform/jenkins/app-jobs.groovy', encoding: 'UTF-8'), additionalParameters: [appJobs: readJSON(file: 'app-jobs.json', returnPojo: true)], removedJobAction: 'DISABLE', sandbox: false)
+                }
+              }''')
+                    sandbox(true)
+                  }
+                }
+              }
+
+              pipelineJob('github-dispatch') {
+                parameters {
+                  ['REPO', 'SENDER', 'REF', 'SHA', 'KIND'].each { stringParam(it, '', '') }
+                }
+                properties {
+                  buildDiscarder {
+                    strategy {
+                      logRotator {
+                        daysToKeepStr('')
+                        numToKeepStr('100')
+                        artifactDaysToKeepStr('')
+                        artifactNumToKeepStr('')
+                      }
+                    }
+                  }
+                  disableConcurrentBuilds()
+                  pipelineTriggers {
+                    triggers {
+                      genericTrigger {
+                        genericVariables {
+                          genericVariable { key('REPO'); value('$.repo'); expressionType('JSONPath'); regexpFilter(''); defaultValue('') }
+                          genericVariable { key('SENDER'); value('$.sender'); expressionType('JSONPath'); regexpFilter(''); defaultValue('') }
+                          genericVariable { key('REF'); value('$.ref'); expressionType('JSONPath'); regexpFilter(''); defaultValue('') }
+                          genericVariable { key('SHA'); value('$.sha'); expressionType('JSONPath'); regexpFilter(''); defaultValue('') }
+                          genericVariable { key('KIND'); value('$.kind'); expressionType('JSONPath'); regexpFilter(''); defaultValue('') }
+                        }
+                        token('')
+                        tokenCredentialId('github-hook-token')
+                        regexpFilterText('$REPO $SENDER $REF $SHA $KIND')
+                        // change this: the GitOps repo, its IAM role id and the role id of the app repos
+                        regexpFilterExpression('^(your-org/gitops AROAEXAMPLE0000000001|(?!your-org/gitops )[A-Za-z0-9-]+/[A-Za-z0-9._-]+ AROAEXAMPLE0000000002) refs/(heads/[A-Za-z0-9._/-]+ [0-9a-f]{40} (test|deploy)?|tags/v[0-9]+\\.[0-9]+\\.[0-9]+ [0-9a-f]{40} (deploy)?)\\z')
+                        causeString('Request for $REPO $REF $KIND')
+                        printContributedVariables(false)
+                        printPostContent(false)
+                        silentResponse(true)
+                        shouldNotFlatten(false)
+                      }
+                    }
+                  }
+                }
+                definition {
+                  cps {
+                    script("@Library('ci') _\ndispatch()")
+                    sandbox(true)
+                  }
+                }
+              }
+
+              pipelineJob('smoke') {
+                properties {
+                  buildDiscarder {
+                    strategy {
+                      logRotator {
+                        daysToKeepStr('')
+                        numToKeepStr('20')
+                        artifactDaysToKeepStr('')
+                        artifactNumToKeepStr('')
+                      }
+                    }
+                  }
+                  disableConcurrentBuilds()
+                }
+                definition {
+                  cps {
+                    script('''node('scan') {
+                stage('Tools') {
+                  container('trivy') {
+                    sh 'trivy --version'
+                  }
+                  container('tools') {
+                    sh 'cosign version'
+                  }
+                }
+                stage('GitHub App') {
+                  container('tools') {
+                    withCredentials([usernamePassword(credentialsId: 'github-app', usernameVariable: 'GITHUB_APP_ID', passwordVariable: 'GITHUB_TOKEN')]) {
+                      sh 'curl -fsS -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github+json" https://api.github.com/installation/repositories | jq -r ".total_count, .repositories[].full_name"'
+                    }
+                  }
+                }
+                stage('OIDC token') {
+                  container('tools') {
+                    for (String credential : ['aws-infra', 'aws-config-read', 'aws-image-signing', 'aws-image-push', 'aws-image-pull', 'aws-dependency-fetch']) {
+                      withCredentials([file(credentialsId: credential, variable: 'AWS_WEB_IDENTITY_TOKEN_FILE')]) {
+                        def token = sh(returnStdout: true, script: 'P=$(cut -d. -f2 "$AWS_WEB_IDENTITY_TOKEN_FILE" | tr _- /+); while [ $(( $(printf %s "$P" | wc -c) % 4 )) -ne 0 ]; do P="$P="; done; printf %s "$P" | base64 -d | jq -c "{iss, aud, sub, build_number, lifetime: (.exp - .iat)}"').trim()
+                        echo credential + ' ' + token
+                        def claims = readJSON(text: token, returnPojo: true)
+                        def audienceOk = claims.aud == credential || claims.aud == [credential]
+                        // change this: the OIDC issuer address
+                        if (claims.iss != 'https://gitops-jenkins-oidc-123456789012.s3.eu-west-1.amazonaws.com/jenkins' || !audienceOk || claims.sub != 'smoke' || claims.build_number != currentBuild.number || claims.lifetime > 900) {
+                          error(credential + ' token has unexpected claims: ' + token)
+                        }
+                      }
+                    }
+                  }
+                }
+              }''')
+                    sandbox(true)
+                  }
+                }
+              }
+  initScripts:
+    "-oidc-signing-key": |
+      import com.cloudbees.plugins.credentials.SystemCredentialsProvider
+      import com.cloudbees.plugins.credentials.domains.Domain
+      import io.jenkins.plugins.oidc_provider.IdTokenFileCredentials
+      import java.security.KeyFactory
+      import java.security.MessageDigest
+      import java.security.interfaces.RSAPrivateCrtKey
+      import java.security.spec.PKCS8EncodedKeySpec
+      import java.util.logging.Logger
+      import jenkins.model.Jenkins
+
+      def titles = ['aws-infra': 'AWS Terraform', 'aws-config-read': 'AWS config read', 'aws-image-signing': 'AWS image signing', 'aws-image-push': 'AWS image push', 'aws-image-pull': 'AWS image pull', 'aws-dependency-fetch': 'AWS dependency fetch']
+      def keyFile = new File('/run/secrets/additional/jenkins-oidc-signing-key-private-key')
+      def log = Logger.getLogger('init-oidc-signing-key')
+      def store = SystemCredentialsProvider.getInstance().getStore()
+      def declared = [:]
+      titles.each { credentialId, title ->
+        def generated = store.getCredentials(Domain.global()).find { it instanceof IdTokenFileCredentials && it.id == credentialId }
+        if (generated == null) {
+          log.severe("${title}: credential ${credentialId} is missing after JCasC, builds fail until JCasC declares it")
+        } else {
+          declared[credentialId] = generated
+        }
+      }
+      def remove = { credentialId, reason ->
+        store.removeCredentials(Domain.global(), declared[credentialId])
+        log.severe("${titles[credentialId]}: removed ${credentialId}, ${reason}")
+      }
+
+      if (declared.isEmpty()) {
+        return
+      }
+      if (!keyFile.isFile()) {
+        declared.keySet().each { remove(it, "signing key file ${keyFile} is missing") }
+        return
+      }
+      def encoded
+      try {
+        encoded = keyFile.text.trim()
+        def privateKey = (RSAPrivateCrtKey) KeyFactory.getInstance('RSA').generatePrivate(new PKCS8EncodedKeySpec(Base64.decoder.decode(encoded)))
+        def modulus = privateKey.modulus.toByteArray()
+        def unsigned = modulus[0] == 0 ? Arrays.copyOfRange(modulus, 1, modulus.length) : modulus
+        def n = Base64.urlEncoder.withoutPadding().encodeToString(unsigned)
+        def fingerprint = MessageDigest.getInstance('SHA-256').digest(n.getBytes('US-ASCII')).encodeHex().toString()
+        log.info("read the signing key, sha256 of n is ${fingerprint}")
+      } catch (Exception failure) {
+        declared.keySet().each { remove(it, "the signing key did not restore: ${failure.class.name}") }
+        return
+      }
+      declared.each { credentialId, generated ->
+        try {
+          def xml = """<io.jenkins.plugins.oidc__provider.IdTokenFileCredentials>
+        <scope>GLOBAL</scope>
+        <id>${credentialId}</id>
+        <description>${generated.description}</description>
+        <privateKey>${encoded}</privateKey>
+        <issuer>${generated.issuer}</issuer>
+        <audience>${generated.audience}</audience>
+      </io.jenkins.plugins.oidc__provider.IdTokenFileCredentials>"""
+          store.updateCredentials(Domain.global(), generated, Jenkins.XSTREAM2.fromXML(xml))
+          log.info("${titles[credentialId]}: restored the signing key into ${credentialId}")
+        } catch (Exception failure) {
+          remove(credentialId, "the credential store did not take the restored key: ${failure.class.name}")
+        }
+      }
+  sidecars:
+    configAutoReload:
+      enabled: false
+  ingress:
+    enabled: false
+  testEnabled: false
+
+persistence:
+  enabled: true
+  storageClass: local-path-retain
+  size: 8Gi
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false
+
+agent:
+  enabled: false
+
+rbac:
+  create: false
+
+networkPolicy:
+  enabled: false

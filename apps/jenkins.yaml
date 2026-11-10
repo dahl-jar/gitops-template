@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: jenkins
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: gitops
+spec:
+  project: ci
+  sources:
+    - repoURL: https://charts.jenkins.io
+      chart: jenkins
+      targetRevision: 5.10.10
+      helm:
+        releaseName: jenkins
+        valueFiles:
+          - $values/platform/jenkins/values.yaml
+    # change this: SSH URL of the GitOps repo
+    - repoURL: git@github.com:your-org/gitops.git
+      targetRevision: prod
+      ref: values
+    # change this: SSH URL of the GitOps repo
+    - repoURL: git@github.com:your-org/gitops.git
+      targetRevision: prod
+      path: platform/jenkins/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: jenkins
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
+      - ServerSideApply=true
