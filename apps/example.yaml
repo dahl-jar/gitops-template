@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: example
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: gitops
+spec:
+  project: example
+  source:
+    # change this: SSH URL of the GitOps repo
+    repoURL: git@github.com:your-org/gitops.git
+    targetRevision: prod
+    path: deploy/example-api
+  destination:
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
+      - ServerSideApply=true
+  ignoreDifferences:
+    - group: apps
+      kind: StatefulSet
+      jsonPointers:
+        - /spec/volumeClaimTemplates

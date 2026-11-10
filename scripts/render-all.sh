@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Render every kustomization under the given roots into $OUT (default: out/).
 set -euo pipefail
 
 OUT="${OUT:-out}"
@@ -22,15 +21,5 @@ while IFS= read -r file; do
     status=1
   fi
 done < <(find "${roots[@]}" -name kustomization.yaml -not -path "*/base/*" 2>/dev/null | sort)
-
-while IFS= read -r dir; do
-  if [ -f "$dir/kustomization.yaml" ] || ! ls "$dir"/*.yaml >/dev/null 2>&1; then
-    continue
-  fi
-  target="$OUT/${dir//\//__}.yaml"
-  find "$dir" -maxdepth 1 -name '*.yaml' -not -name 'secret.example.yaml' | sort \
-    | xargs awk 'FNR == 1 { print "---" } { print }' > "$target"
-  echo "copied   $dir"
-done < <(find "${roots[@]}" -type d 2>/dev/null | sort)
 
 exit "$status"

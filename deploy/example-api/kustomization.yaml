@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../modules/example-api/base
+
+components:
+- ../../modules/example-api/components/production
+- ../../versions/example-api
+
+configMapGenerator:
+- name: example-config
+  namespace: example
+  envs:
+  - variables.env
+  options:
+    disableNameSuffixHash: true
+    labels:
+      app.kubernetes.io/part-of: example

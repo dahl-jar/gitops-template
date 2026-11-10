@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["service", "repo", "testSuite", "environments"],
+  "additionalProperties": false,
+  "properties": {
+    "service": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "repo": { "type": "string", "pattern": "^[A-Za-z0-9-]+/[A-Za-z0-9._-]+$", "not": { "const": "your-org/gitops" } },
+    "repoId": { "type": "integer", "minimum": 1 },
+    "testSuite": { "enum": ["gradle", "pnpm"] },
+    "environments": {
+      "type": "object",
+      "required": ["dev", "production"],
+      "additionalProperties": false,
+      "properties": {
+        "dev": { "$ref": "#/$defs/dev" },
+        "production": { "$ref": "#/$defs/production" }
+      }
+    }
+  },
+  "$defs": {
+    "branch": { "type": "string", "pattern": "^[A-Za-z0-9._/-]+$" },
+    "target": { "enum": ["cluster", "cloudflare-pages"] },
+    "image": { "type": "string", "minLength": 1 },
+    "versions": { "type": "string", "pattern": "^versions/[a-z0-9-]+$" },
+    "versionFile": { "type": "string", "pattern": "^versions/[a-z0-9-]+/[a-z0-9-]+\\.yaml$" },
+    "overlay": { "type": "string", "pattern": "^deploy/[a-z0-9-]+$" },
+    "config": { "type": "string", "pattern": "^[a-z]+$" },
+    "buildArgs": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[A-Z][A-Z0-9_]*$" },
+      "additionalProperties": { "type": "string", "pattern": "^[A-Za-z0-9._:/-]+$" }
+    },
+    "pnpmInstalls": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "required": ["folder", "flags"],
+        "additionalProperties": false,
+        "properties": {
+          "folder": { "type": "string", "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$" },
+          "flags": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": { "enum": ["--prod", "--config.node-linker=hoisted"] }
+          }
+        }
+      }
+    },
+    "clusterRequires": {
+      "if": { "properties": { "target": { "const": "cluster" } }, "required": ["target"] },
+      "then": { "required": ["image", "versions", "overlay"] }
+    },
+    "dev": {
+      "type": "object",
+      "required": ["branches", "target"],
+      "additionalProperties": false,
+      "properties": {
+        "branches": { "type": "array", "items": { "$ref": "#/$defs/branch" } },
+        "target": { "$ref": "#/$defs/target" },
+        "image": { "$ref": "#/$defs/image" },
+        "manifestImage": { "$ref": "#/$defs/image" },
+        "versions": { "$ref": "#/$defs/versions" },
+        "versionFile": { "$ref": "#/$defs/versionFile" },
+        "overlay": { "$ref": "#/$defs/overlay" },
+        "config": { "$ref": "#/$defs/config" },
+        "buildArgs": { "$ref": "#/$defs/buildArgs" },
+        "pnpmInstalls": { "$ref": "#/$defs/pnpmInstalls" }
+      },
+      "allOf": [{ "$ref": "#/$defs/clusterRequires" }]
+    },
+    "production": {
+      "type": "object",
+      "required": ["releaseFrom", "target", "versionFile"],
+      "additionalProperties": false,
+      "properties": {
+        "releaseFrom": { "$ref": "#/$defs/branch" },
+        "target": { "$ref": "#/$defs/target" },
+        "image": { "$ref": "#/$defs/image" },
+        "manifestImage": { "$ref": "#/$defs/image" },
+        "versions": { "$ref": "#/$defs/versions" },
+        "versionFile": { "$ref": "#/$defs/versionFile" },
+        "overlay": { "$ref": "#/$defs/overlay" },
+        "config": { "$ref": "#/$defs/config" },
+        "buildEnv": {
+          "type": "object",
+          "propertyNames": { "pattern": "^VITE_[A-Z0-9_]*$" },
+          "additionalProperties": { "type": "string" }
+        }
+      },
+      "allOf": [{ "$ref": "#/$defs/clusterRequires" }]
+    }
+  }
+}

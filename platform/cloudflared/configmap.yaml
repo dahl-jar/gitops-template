@@ -4,14 +4,16 @@ metadata:
   name: cloudflared
   namespace: cloudflared
   labels:
-    app.kubernetes.io/part-of: platform
+    app.kubernetes.io/part-of: gitops
 data:
   config.yaml: |
-    tunnel: REPLACE_WITH_TUNNEL_ID
+    # change this: the tunnel id
+    tunnel: 00000000-0000-0000-0000-000000000000
     credentials-file: /etc/cloudflared/creds/credentials.json
     metrics: 0.0.0.0:2000
     no-autoupdate: true
     ingress:
+      # change this: the public API host
       - hostname: api.example.com
         service: http://traefik.kube-system.svc.cluster.local:80
       - service: http_status:404

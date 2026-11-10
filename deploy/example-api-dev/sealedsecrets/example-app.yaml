@@ -1,0 +1,14 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: example-app
+  namespace: example-dev
+  annotations:
+    argocd.argoproj.io/sync-wave: '-1'
+spec:
+  encryptedData: {}
+  template:
+    metadata:
+      name: example-app
+      namespace: example-dev

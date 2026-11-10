@@ -3,35 +3,55 @@ name: verify
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [prod, dev]
 
 permissions:
   contents: read
 
 env:
   KUBECONFORM_VERSION: v0.8.0
+  KUBECONFORM_SHA256: 9bc2bffbf71f261128533edaf912153948b7ff238f9a531ae6d34466ec287883
+  TERRAFORM_VERSION: 1.17.1
+  # change this: the GitHub user or org that owns the GHCR images
+  GHCR_USER: your-org
+  # change this: the AWS region of the image registry
+  AWS_REGION: eu-west-1
 
 jobs:
   render-and-validate:
     name: Render and validate manifests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
-      - uses: astral-sh/setup-uv@e92bafb6253dcd438e0484186d7669ea7a8ca1cc  # v6
+      - uses: astral-sh/setup-uv@e92bafb6253dcd438e0484186d7669ea7a8ca1cc
 
       - name: Install kubeconform
         run: |
           set -euo pipefail
-          curl -sSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
-            | tar -xz -C /usr/local/bin kubeconform
+          archive="${RUNNER_TEMP}/kubeconform.tar.gz"
+          curl -fsSLo "${archive}" "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz"
+          echo "${KUBECONFORM_SHA256}  ${archive}" | sha256sum -c -
+          tar -xzf "${archive}" -C /usr/local/bin kubeconform
           kubeconform -v
 
       - name: Render every kustomization
         run: scripts/render-all.sh
 
+      - name: Environment files match the schema
+        run: uv run --with pyyaml --with jsonschema python3 scripts/check_environments.py environments/*.yaml
+
+      - name: Environment files map to Jenkins jobs
+        run: uv run --with pyyaml python3 scripts/app_jobs.py environments > /dev/null
+
+      - name: Project ci allows every kind its Applications render
+        run: uv run --with pyyaml python3 scripts/check_project_kinds.py ci
+
+      - name: Tunnel routes keep LAN hosts private
+        run: uv run --with pyyaml python3 scripts/check_tunnel_routes.py
+
       - name: Claims use a Retain storage class
-        run: uv run --with pyyaml python3 scripts/check-storage-classes.py out/*.yaml
+        run: uv run --with pyyaml python3 scripts/check_storage_classes.py out/*.yaml
 
       - name: Validate rendered manifests
         run: |
@@ -46,7 +66,7 @@ jobs:
     name: Applications point at existing paths
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Check every Application source path
         run: |
@@ -64,17 +84,35 @@ jobs:
             else
               echo "ok      $name -> $path"
             fi
-          done < <(find apps -name '*.yaml' | sort)
+          done < <(find apps platform/argocd -name '*.yaml' | sort)
           exit "$failed"
 
   image-digests:
     name: Pinned images exist in their registries
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
 
       - name: Render every kustomization
         run: scripts/render-all.sh
+
+      - name: Render the previous commit
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BASE_SHA}" ] || ! git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
+            echo "no previous commit, every image is checked"
+            exit 0
+          fi
+          git worktree add --detach "${RUNNER_TEMP}/base" "${BASE_SHA}"
+          (cd "${RUNNER_TEMP}/base" && OUT="${GITHUB_WORKSPACE}/out-base" scripts/render-all.sh) \
+            || echo "previous commit did not fully render, its missing services count as new"
 
       - name: Log in to GHCR for private images
         env:
@@ -82,10 +120,59 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${GHCR_READ_TOKEN}" ]; then
-            echo "GHCR_READ_TOKEN not set; private images will show as missing"
+            echo "GHCR_READ_TOKEN is not set, private ghcr.io images show as missing"
             exit 0
           fi
-          printf '%s' "${GHCR_READ_TOKEN}" | docker login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
+          printf '%s' "${GHCR_READ_TOKEN}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
+
+      - name: Assume the image check role
+        if: vars.AWS_VERIFY_ROLE_ARN != ''
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd
+        with:
+          role-to-assume: ${{ vars.AWS_VERIFY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Check image digests
+        env:
+          BASE_DIR: out-base
+          ECR_SKIP: ${{ vars.AWS_VERIFY_ROLE_ARN == '' }}
         run: scripts/check-image-digests.sh out/*.yaml
+
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Check formatting
+        run: terraform fmt -check -recursive infra
+
+      - name: Validate each stack
+        run: |
+          set -euo pipefail
+          for stack in infra/aws/account infra/aws/deploy-hook infra/aws/registry; do
+            terraform -chdir="$stack" init -backend=false -input=false
+            terraform -chdir="$stack" validate
+          done
+
+  jenkins-commits:
+    name: Jenkins commits
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+
+      - name: Jenkins commits change only pin and config files
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          git show "origin/prod:scripts/check_jenkins_commits.py" > "$RUNNER_TEMP/check_jenkins_commits.py"
+          python3 "$RUNNER_TEMP/check_jenkins_commits.py" "$BEFORE" "$GITHUB_SHA" "$GITHUB_REF_NAME"

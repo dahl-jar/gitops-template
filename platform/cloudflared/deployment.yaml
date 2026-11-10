@@ -5,7 +5,7 @@ metadata:
   namespace: cloudflared
   labels:
     app.kubernetes.io/name: cloudflared
-    app.kubernetes.io/part-of: platform
+    app.kubernetes.io/part-of: gitops
 spec:
   replicas: 2
   selector:
@@ -15,12 +15,16 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: cloudflared
-        app.kubernetes.io/part-of: platform
+        app.kubernetes.io/part-of: gitops
     spec:
       containers:
         - name: cloudflared
-          image: cloudflare/cloudflared:2025.5.0
-          args: ["tunnel", "--config", "/etc/cloudflared/config/config.yaml", "run"]
+          image: cloudflare/cloudflared:2026.10.3
+          args:
+            - tunnel
+            - --config
+            - /etc/cloudflared/config/config.yaml
+            - run
           livenessProbe:
             httpGet:
               path: /ready

@@ -1,0 +1,10 @@
+name: example-api
+# change this: GitHub repo of the app
+source: github.com/your-org/example-api
+# change this: image path with the AWS account id and region
+image: 123456789012.dkr.ecr.eu-west-1.amazonaws.com/example-api
+pinnedBy: Jenkins example-api-dev (versions/example-api-dev on dev) and example-api-production (versions/example-api on prod)
+# change this: owner of the app
+owner: your-team
+components: app, postgres 17
+secrets: seal-secrets.sh in components/production/
